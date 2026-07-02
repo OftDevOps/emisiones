@@ -6,7 +6,7 @@ from django.test import TestCase
 from apps.accounts.models import CustomUser, UserRole
 from apps.beneficiaries.models import Beneficiary, BeneficiaryType
 from apps.organization.models import Company
-from apps.payment_approvals.models import ApprovalActionType, ApprovalStepStatus, PaymentApprovalAction, PaymentApprovalStep
+from apps.payment_approvals.models import ApprovalActionType, ApprovalStepStatus, PaymentApprovalAction
 from apps.payment_requests.models import Currency, PaymentRequest, PaymentRequestStatus
 
 
