@@ -41,6 +41,23 @@ class PaymentRequestDetailView(LoginRequiredMixin, DetailView):
             "approval_actions",
         )
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        payment_request = self.object
+        user = self.request.user
+        approval_steps = list(payment_request.approval_steps.all().order_by("sequence"))
+
+        for step in approval_steps:
+            step.can_current_user_act = (
+                step.status == "PENDING"
+                and step.required_role == user.role
+                and payment_request.company_id == getattr(user, "primary_company_id", None)
+            )
+
+        context["approval_steps"] = approval_steps
+        context["approval_actions"] = payment_request.approval_actions.all().order_by("-created_at")
+        return context
+
 
 class PaymentRequestCreateView(LoginRequiredMixin, CreateView):
     model = PaymentRequest
