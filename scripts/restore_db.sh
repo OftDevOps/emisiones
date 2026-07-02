@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ -z "${1:-}" ]; then
-  echo "Usage: ./scripts/restore_db.sh backups/file.dump"
+if [ $# -ne 1 ]; then
+  echo "Uso: $0 backups/archivo.sql.gz" >&2
   exit 1
 fi
 
 FILE="$1"
+if [ ! -f "$FILE" ]; then
+  echo "ERROR: no existe $FILE" >&2
+  exit 1
+fi
 
-docker cp "$FILE" emisiones_db:/tmp/restore.dump
-docker exec emisiones_db pg_restore -U emisiones_user -d emisiones_db --clean --if-exists /tmp/restore.dump
-
-echo "Restore completed from: $FILE"
+gunzip -c "$FILE" | docker compose exec -T db psql -U "${POSTGRES_USER:-emisiones_user}" "${POSTGRES_DB:-emisiones_db}"
+echo "Restore aplicado desde: $FILE"

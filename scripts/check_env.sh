@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ ! -f ".env" ]; then
-  echo "Missing .env file. Copy .env.example to .env"
-  exit 1
-fi
+required_files=(
+  ".env"
+  "docker-compose.yml"
+  "backend/manage.py"
+  "backend/config/settings/base.py"
+)
 
-echo ".env file found"
+for file in "${required_files[@]}"; do
+  if [ ! -f "$file" ]; then
+    echo "ERROR: falta $file" >&2
+    exit 1
+  fi
+  echo "OK: $file"
+done
+
+echo "Validacion basica completada."

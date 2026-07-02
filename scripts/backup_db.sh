@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BACKUP_DIR="./backups"
-TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-FILE="$BACKUP_DIR/emisiones_db_$TIMESTAMP.dump"
+mkdir -p backups
+STAMP=$(date +%Y%m%d_%H%M%S)
+OUT="backups/emisiones_db_${STAMP}.sql.gz"
 
-mkdir -p "$BACKUP_DIR"
-
-docker exec emisiones_db pg_dump -U emisiones_user -d emisiones_db -F c -f "/tmp/emisiones_db_$TIMESTAMP.dump"
-docker cp "emisiones_db:/tmp/emisiones_db_$TIMESTAMP.dump" "$FILE"
-
-echo "Backup created: $FILE"
+docker compose exec -T db pg_dump -U "${POSTGRES_USER:-emisiones_user}" "${POSTGRES_DB:-emisiones_db}" | gzip > "$OUT"
+echo "Backup creado: $OUT"

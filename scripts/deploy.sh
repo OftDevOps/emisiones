@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Deploy script placeholder"
-echo "Pending production deployment definition"
+docker compose pull || true
+docker compose build
+docker compose up -d
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py collectstatic --noinput

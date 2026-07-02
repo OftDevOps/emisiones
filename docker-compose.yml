@@ -1,28 +1,33 @@
 services:
   db:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: emisiones_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: emisiones_db
-      POSTGRES_USER: emisiones_user
-      POSTGRES_PASSWORD: emisiones_password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_DB: ${POSTGRES_DB:-emisiones_db}
+      POSTGRES_USER: ${POSTGRES_USER:-emisiones_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
     ports:
       - "5434:5432"
+    volumes:
+      - emisiones_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U emisiones_user -d emisiones_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-emisiones_user} -d ${POSTGRES_DB:-emisiones_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
-    image: redis:7
+    image: redis:7-alpine
     container_name: emisiones_redis
     restart: unless-stopped
     ports:
       - "6381:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -30,20 +35,25 @@ services:
       dockerfile: docker/backend.Dockerfile
     container_name: emisiones_backend
     restart: unless-stopped
-    command: python manage.py runserver 0.0.0.0:8000
-    working_dir: /app/backend
-    volumes:
-      - ./backend:/app/backend
-      - ./docs:/app/docs
-    ports:
-      - "8001:8000"
     env_file:
       - .env
+    working_dir: /app/backend
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --reload
+    volumes:
+      - ./backend:/app/backend:Z
+      - ./logs:/app/logs:Z
+    ports:
+      - "127.0.0.1:8001:8000"
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
-  postgres_data:
+  emisiones_postgres_data:
