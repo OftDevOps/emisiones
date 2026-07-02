@@ -14,6 +14,7 @@ CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="http://localhost:
 
 INSTALLED_APPS = [
     "apps.organization",
+    "apps.beneficiaries",
     "apps.accounts",
     "django.contrib.admin",
     "django.contrib.auth",
