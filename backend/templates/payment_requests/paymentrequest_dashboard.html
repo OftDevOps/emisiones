@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Dashboard operativo de solicitudes</h1>
+
+<section>
+  <h2>Resumen ejecutivo</h2>
+  <p><strong>Total de solicitudes:</strong> {{ total_requests }}</p>
+
+  <div>
+    {% for card in status_cards %}
+      <article>
+        <h3>{{ card.label }}</h3>
+        <p>{{ card.total }}</p>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section>
+  <h2>Pendientes de aprobación para mi rol</h2>
+
+  {% if pending_approval_steps %}
+    <table>
+      <thead>
+        <tr>
+          <th>Solicitud</th>
+          <th>Empresa</th>
+          <th>Beneficiario</th>
+          <th>Monto</th>
+          <th>Paso</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for step in pending_approval_steps %}
+          <tr>
+            <td>#{{ step.payment_request.id }}</td>
+            <td>{{ step.payment_request.company }}</td>
+            <td>{{ step.payment_request.beneficiary }}</td>
+            <td>{{ step.payment_request.amount }} {{ step.payment_request.currency }}</td>
+            <td>{{ step.sequence }}</td>
+            <td>
+              <a href="{% url 'payment_requests:detail' step.payment_request.pk %}">
+                Ver solicitud
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No hay aprobaciones pendientes para tu rol.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>Últimas solicitudes</h2>
+
+  {% if latest_requests %}
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Empresa</th>
+          <th>Beneficiario</th>
+          <th>Concepto</th>
+          <th>Monto</th>
+          <th>Estado</th>
+          <th>Creada</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for payment_request in latest_requests %}
+          <tr>
+            <td>
+              <a href="{% url 'payment_requests:detail' payment_request.pk %}">
+                #{{ payment_request.id }}
+              </a>
+            </td>
+            <td>{{ payment_request.company }}</td>
+            <td>{{ payment_request.beneficiary }}</td>
+            <td>{{ payment_request.concept }}</td>
+            <td>{{ payment_request.amount }} {{ payment_request.currency }}</td>
+            <td>{{ payment_request.get_status_display }}</td>
+            <td>{{ payment_request.created_at }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No hay solicitudes registradas.</p>
+  {% endif %}
+</section>
+
+<p>
+  <a href="{% url 'payment_requests:list' %}">Volver a solicitudes</a>
+</p>
+{% endblock %}

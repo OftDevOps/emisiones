@@ -1,11 +1,17 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DetailView, ListView
+from django.views.generic import CreateView, DetailView, ListView, TemplateView
 
-from apps.payment_approvals.models import ApprovalActionType, PaymentApprovalAction
+from apps.payment_approvals.models import (
+    ApprovalActionType,
+    ApprovalStepStatus,
+    PaymentApprovalAction,
+    PaymentApprovalStep,
+)
 
 from .forms import PaymentRequestCreateForm
 from .models import PaymentRequest, PaymentRequestStatus
@@ -14,10 +20,13 @@ from .models import PaymentRequest, PaymentRequestStatus
 def scoped_payment_request_queryset(user):
     queryset = PaymentRequest.objects.select_related("company", "beneficiary", "requested_by")
 
-    if not user.is_superuser and getattr(user, "primary_company_id", None):
-        queryset = queryset.filter(company=user.primary_company)
+    if user.is_superuser:
+        return queryset
 
-    return queryset
+    if getattr(user, "primary_company_id", None):
+        return queryset.filter(company_id=user.primary_company_id)
+
+    return queryset.none()
 
 
 class PaymentRequestListView(LoginRequiredMixin, ListView):
@@ -56,6 +65,44 @@ class PaymentRequestDetailView(LoginRequiredMixin, DetailView):
 
         context["approval_steps"] = approval_steps
         context["approval_actions"] = payment_request.approval_actions.all().order_by("-created_at")
+        return context
+
+
+
+class PaymentRequestDashboardView(LoginRequiredMixin, TemplateView):
+    template_name = "payment_requests/paymentrequest_dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        payment_requests = scoped_payment_request_queryset(user)
+
+        status_totals = dict(
+            payment_requests.values_list("status").annotate(total=Count("id"))
+        )
+        status_cards = [
+            {
+                "code": status_code,
+                "label": status_label,
+                "total": status_totals.get(status_code, 0),
+            }
+            for status_code, status_label in PaymentRequestStatus.choices
+        ]
+
+        pending_steps = PaymentApprovalStep.objects.select_related(
+            "payment_request",
+            "payment_request__company",
+            "payment_request__beneficiary",
+        ).filter(
+            status=ApprovalStepStatus.PENDING,
+            required_role=user.role,
+            payment_request__in=payment_requests,
+        ).order_by("sequence", "-payment_request__created_at")[:10]
+
+        context["total_requests"] = payment_requests.count()
+        context["status_cards"] = status_cards
+        context["latest_requests"] = payment_requests.order_by("-created_at")[:10]
+        context["pending_approval_steps"] = pending_steps
         return context
 
 
