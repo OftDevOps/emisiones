@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Nueva solicitud de pago{% endblock %}
+
+{% block content %}
+<h1>Nueva solicitud de pago</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <p>
+        {{ form.company.label_tag }}<br>
+        {{ form.company }}
+        {{ form.company.errors }}
+    </p>
+
+    <p>
+        {{ form.beneficiary.label_tag }}<br>
+        {{ form.beneficiary }}
+        {{ form.beneficiary.errors }}
+    </p>
+
+    <p>
+        {{ form.amount.label_tag }}<br>
+        {{ form.amount }}
+        {{ form.amount.errors }}
+    </p>
+
+    <p>
+        {{ form.currency.label_tag }}<br>
+        {{ form.currency }}
+        {{ form.currency.errors }}
+    </p>
+
+    <p>
+        {{ form.concept.label_tag }}<br>
+        {{ form.concept }}
+        {{ form.concept.errors }}
+    </p>
+
+    <p>
+        {{ form.description.label_tag }}<br>
+        {{ form.description }}
+        {{ form.description.errors }}
+    </p>
+
+    <p>
+        {{ form.due_date.label_tag }}<br>
+        {{ form.due_date }}
+        {{ form.due_date.errors }}
+    </p>
+
+    <button type="submit">Crear solicitud</button>
+</form>
+
+<p>
+    <a href="{% url 'payment_requests:list' %}">Cancelar</a>
+</p>
+{% endblock %}

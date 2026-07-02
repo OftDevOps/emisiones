@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitud de pago #{{ payment_request.id }}{% endblock %}
+
+{% block content %}
+<h1>Solicitud de pago #{{ payment_request.id }}</h1>
+
+<dl>
+    <dt>Empresa</dt>
+    <dd>{{ payment_request.company }}</dd>
+
+    <dt>Beneficiario</dt>
+    <dd>{{ payment_request.beneficiary }}</dd>
+
+    <dt>Solicitante</dt>
+    <dd>{{ payment_request.requested_by }}</dd>
+
+    <dt>Monto</dt>
+    <dd>{{ payment_request.amount }} {{ payment_request.currency }}</dd>
+
+    <dt>Concepto</dt>
+    <dd>{{ payment_request.concept }}</dd>
+
+    <dt>Descripción</dt>
+    <dd>{{ payment_request.description|default:"-" }}</dd>
+
+    <dt>Fecha de vencimiento</dt>
+    <dd>{{ payment_request.due_date|default:"-" }}</dd>
+
+    <dt>Estado</dt>
+    <dd>{{ payment_request.get_status_display }}</dd>
+</dl>
+
+<p>
+    <a href="{% url 'payment_requests:list' %}">Volver al listado</a>
+</p>
+{% endblock %}

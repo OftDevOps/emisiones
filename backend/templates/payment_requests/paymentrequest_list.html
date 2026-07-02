@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitudes de pago{% endblock %}
+
+{% block content %}
+<h1>Solicitudes de pago</h1>
+
+<p>
+    <a href="{% url 'payment_requests:create' %}">Nueva solicitud</a>
+</p>
+
+{% if payment_requests %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Empresa</th>
+            <th>Beneficiario</th>
+            <th>Concepto</th>
+            <th>Monto</th>
+            <th>Moneda</th>
+            <th>Estado</th>
+            <th>Creada</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for request in payment_requests %}
+        <tr>
+            <td>{{ request.id }}</td>
+            <td>{{ request.company }}</td>
+            <td>{{ request.beneficiary }}</td>
+            <td>{{ request.concept }}</td>
+            <td>{{ request.amount }}</td>
+            <td>{{ request.currency }}</td>
+            <td>{{ request.get_status_display }}</td>
+            <td>{{ request.created_at|date:"Y-m-d H:i" }}</td>
+            <td><a href="{% url 'payment_requests:detail' request.pk %}">Ver</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No hay solicitudes de pago registradas.</p>
+{% endif %}
+{% endblock %}
