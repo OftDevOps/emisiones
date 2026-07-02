@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     "apps.organization",
     "apps.beneficiaries",
     "apps.payment_requests",
+    "apps.payment_documents",
     "apps.accounts",
     "django.contrib.admin",
     "django.contrib.auth",
