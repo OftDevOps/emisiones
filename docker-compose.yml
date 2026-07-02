@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:16
+    container_name: emisiones_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: emisiones_db
+      POSTGRES_USER: emisiones_user
+      POSTGRES_PASSWORD: emisiones_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U emisiones_user -d emisiones_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: emisiones_redis
+    restart: unless-stopped
+    ports:
+      - "6381:6379"
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: emisiones_backend
+    restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8000
+    working_dir: /app/backend
+    volumes:
+      - ./backend:/app/backend
+      - ./docs:/app/docs
+    ports:
+      - "8001:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  postgres_data:
