@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Panel principal | Emisiones{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1>Panel principal</h1>
+    <p class="muted">Base autenticada del Sistema de Rutas de Pago Oftalmi.</p>
+
+    <dl>
+        <dt>Usuario</dt>
+        <dd>{{ request.user.email }}</dd>
+
+        <dt>Rol</dt>
+        <dd>{{ request.user.get_role_display|default:request.user.role }}</dd>
+
+        <dt>Empresa principal</dt>
+        <dd>{{ request.user.primary_company|default:"No definida" }}</dd>
+
+        <dt>Unidad organizativa</dt>
+        <dd>{{ request.user.primary_organizational_unit|default:"No definida" }}</dd>
+    </dl>
+</section>
+{% endblock %}
