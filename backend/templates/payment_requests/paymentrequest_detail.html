@@ -31,6 +31,90 @@
     <dd>{{ payment_request.get_status_display }}</dd>
 </dl>
 
+{% if payment_request.status == "DRAFT" %}
+<section>
+    <h2>Acciones</h2>
+
+    <form method="post" action="{% url 'payment_requests:submit' payment_request.pk %}">
+        {% csrf_token %}
+        <button type="submit">Enviar a aprobación</button>
+    </form>
+
+    <form method="post" action="{% url 'payment_requests:cancel' payment_request.pk %}">
+        {% csrf_token %}
+        <button type="submit">Cancelar solicitud</button>
+    </form>
+</section>
+{% endif %}
+
+<section>
+    <h2>Ruta de aprobación</h2>
+
+    {% with steps=payment_request.approval_steps.all %}
+        {% if steps %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Secuencia</th>
+                    <th>Rol requerido</th>
+                    <th>Estado</th>
+                    <th>Ejecutado por</th>
+                    <th>Fecha</th>
+                    <th>Comentario</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for step in steps %}
+                <tr>
+                    <td>{{ step.sequence }}</td>
+                    <td>{{ step.get_required_role_display }}</td>
+                    <td>{{ step.get_status_display }}</td>
+                    <td>{{ step.acted_by|default:"-" }}</td>
+                    <td>{{ step.acted_at|date:"Y-m-d H:i"|default:"-" }}</td>
+                    <td>{{ step.comment|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>La solicitud todavía no tiene ruta de aprobación generada.</p>
+        {% endif %}
+    {% endwith %}
+</section>
+
+<section>
+    <h2>Historial de acciones</h2>
+
+    {% with actions=payment_request.approval_actions.all %}
+        {% if actions %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Acción</th>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Fecha</th>
+                    <th>Comentario</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for action in actions %}
+                <tr>
+                    <td>{{ action.get_action_display }}</td>
+                    <td>{{ action.performed_by }}</td>
+                    <td>{{ action.get_role_display }}</td>
+                    <td>{{ action.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>{{ action.comment|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Sin acciones registradas.</p>
+        {% endif %}
+    {% endwith %}
+</section>
+
 <p>
     <a href="{% url 'payment_requests:list' %}">Volver al listado</a>
 </p>
