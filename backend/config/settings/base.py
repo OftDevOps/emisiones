@@ -13,6 +13,7 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv(
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="http://localhost:8001,http://127.0.0.1:8001", cast=Csv())
 
 INSTALLED_APPS = [
+    "apps.accounts",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -97,3 +98,6 @@ LOGGING = {
         "level": config("LOG_LEVEL", default="INFO"),
     },
 }
+
+# Custom user model
+AUTH_USER_MODEL = "accounts.CustomUser"
