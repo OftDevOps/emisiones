@@ -8,6 +8,11 @@ from django.db import models
 class PaymentRequestStatus(models.TextChoices):
     DRAFT = "DRAFT", "Borrador"
     SUBMITTED = "SUBMITTED", "Enviada"
+    UNIT_REVIEW = "UNIT_REVIEW", "Revisión unidad"
+    FINANCE_REVIEW = "FINANCE_REVIEW", "Revisión finanzas"
+    MANAGEMENT_REVIEW = "MANAGEMENT_REVIEW", "Revisión gerencia"
+    APPROVED = "APPROVED", "Aprobada"
+    REJECTED = "REJECTED", "Rechazada"
     CANCELLED = "CANCELLED", "Cancelada"
 
 
@@ -81,6 +86,56 @@ class PaymentRequest(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
+
+    def submit_for_approval(self, user):
+        if self.status != PaymentRequestStatus.DRAFT:
+            from django.core.exceptions import ValidationError
+            raise ValidationError("Solo solicitudes en borrador pueden enviarse a aprobación.")
+        self.status = PaymentRequestStatus.UNIT_REVIEW
+        self.save(update_fields=["status", "updated_at"])
+
+        from apps.accounts.models import UserRole
+        from apps.payment_approvals.models import ApprovalActionType, PaymentApprovalAction, PaymentApprovalStep
+
+        default_steps = [
+            (1, UserRole.RESPONSABLE_UNIDAD),
+            (2, UserRole.FINANZAS),
+            (3, UserRole.GERENCIA_GENERAL),
+        ]
+        for sequence, required_role in default_steps:
+            PaymentApprovalStep.objects.get_or_create(
+                payment_request=self,
+                sequence=sequence,
+                defaults={"required_role": required_role},
+            )
+        PaymentApprovalAction.objects.create(
+            payment_request=self,
+            action=ApprovalActionType.SUBMIT,
+            performed_by=user,
+            role=user.role,
+            comment="Solicitud enviada a aprobación.",
+        )
+
+    def refresh_approval_status(self):
+        steps = list(self.approval_steps.order_by("sequence"))
+        if not steps:
+            return
+
+        from apps.payment_approvals.models import ApprovalStepStatus
+
+        if any(step.status == ApprovalStepStatus.REJECTED for step in steps):
+            self.status = PaymentRequestStatus.REJECTED
+        elif all(step.status == ApprovalStepStatus.APPROVED for step in steps):
+            self.status = PaymentRequestStatus.APPROVED
+        else:
+            pending = next((step for step in steps if step.status == ApprovalStepStatus.PENDING), None)
+            if pending and pending.required_role == "FINANZAS":
+                self.status = PaymentRequestStatus.FINANCE_REVIEW
+            elif pending and pending.required_role == "GERENCIA_GENERAL":
+                self.status = PaymentRequestStatus.MANAGEMENT_REVIEW
+            else:
+                self.status = PaymentRequestStatus.UNIT_REVIEW
+        self.save(update_fields=["status", "updated_at"])
 
     def __str__(self) -> str:
         return f"{self.company} - {self.beneficiary} - {self.amount} {self.currency}"
