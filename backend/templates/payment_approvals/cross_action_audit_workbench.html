@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Auditoría de acciones críticas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="h3 mb-1">Auditoría de acciones críticas</h1>
+    <p class="text-muted mb-0">Trazabilidad transversal de solicitudes de pago.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'payment_approvals:pending' %}">Pendientes por aprobar</a>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label" for="id_action">Acción</label>
+        <select class="form-select" id="id_action" name="action">
+          <option value="">Todas</option>
+          {% for value, label in action_choices %}
+            <option value="{{ value }}" {% if filters.action == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="id_company">Empresa</label>
+        <select class="form-select" id="id_company" name="company">
+          <option value="">Todas</option>
+          {% for company in companies %}
+            <option value="{{ company.pk }}" {% if filters.company == company.pk|stringformat:'s' %}selected{% endif %}>{{ company.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label" for="id_date_from">Desde</label>
+        <input class="form-control" type="date" id="id_date_from" name="date_from" value="{{ filters.date_from }}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label" for="id_date_to">Hasta</label>
+        <input class="form-control" type="date" id="id_date_to" name="date_to" value="{{ filters.date_to }}">
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Filtrar</button>
+        <a class="btn btn-outline-secondary" href="{% url 'payment_approvals:audit' %}">Limpiar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>Historial transversal</span>
+    <span class="badge text-bg-secondary">{{ total_actions }} registro(s)</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Solicitud</th>
+          <th>Empresa</th>
+          <th>Acción</th>
+          <th>Usuario</th>
+          <th>Rol</th>
+          <th>Comentario</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for action in actions %}
+          <tr>
+            <td>{{ action.created_at|date:"Y-m-d H:i" }}</td>
+            <td>
+              <a href="{% url 'payment_requests:detail' action.payment_request.pk %}">#{{ action.payment_request.pk }}</a>
+            </td>
+            <td>{{ action.payment_request.company.name }}</td>
+            <td>{{ action.get_action_display }}</td>
+            <td>{{ action.performed_by }}</td>
+            <td>{{ action.get_role_display }}</td>
+            <td>{{ action.comment|default:"-" }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-muted">No hay acciones críticas registradas.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
