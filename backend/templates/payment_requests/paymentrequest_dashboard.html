@@ -4,6 +4,15 @@
 <h1>Dashboard operativo de solicitudes</h1>
 
 <section>
+  <h2>Accesos operativos</h2>
+  <ul>
+    <li><a href="{% url 'payment_approvals:pending' %}">Pendientes por aprobar</a></li>
+    <li><a href="{% url 'payment_approvals:audit' %}">Auditoría de acciones críticas</a></li>
+    <li><a href="{% url 'payment_requests:accounts_payable' %}">Cuentas por Pagar</a></li>
+  </ul>
+</section>
+
+<section>
   <h2>Resumen ejecutivo</h2>
   <p><strong>Total de solicitudes:</strong> {{ total_requests }}</p>
 

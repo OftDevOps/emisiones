@@ -229,3 +229,18 @@ class PaymentRequestDashboardViewTests(TestCase):
         self.assertEqual(pending_steps, [expected_step])
         self.assertContains(response, "Pendiente finanzas")
         self.assertNotContains(response, "Pendiente otra empresa")
+
+    def test_dashboard_shows_operational_access_links(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Accesos operativos")
+        self.assertContains(response, "Pendientes por aprobar")
+        self.assertContains(response, "Auditoría de acciones críticas")
+        self.assertContains(response, "Cuentas por Pagar")
+        self.assertContains(response, reverse("payment_approvals:pending"))
+        self.assertContains(response, reverse("payment_approvals:audit"))
+        self.assertContains(response, reverse("payment_requests:accounts_payable"))
+
