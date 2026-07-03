@@ -2,10 +2,44 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404, redirect
-from django.views import View
+from django.views.generic import ListView, View
+from .models import ApprovalActionType
+from apps.payment_approvals.models import ApprovalStepStatus, PaymentApprovalStep
 
 from .forms import ApprovalActionForm
-from .models import ApprovalActionType, PaymentApprovalStep
+
+
+
+class PendingApprovalStepsView(LoginRequiredMixin, ListView):
+    model = PaymentApprovalStep
+    template_name = "payment_approvals/pending_approval_steps.html"
+    context_object_name = "pending_steps"
+    paginate_by = 25
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = PaymentApprovalStep.objects.select_related(
+            "payment_request",
+            "payment_request__company",
+            "payment_request__beneficiary",
+            "payment_request__requested_by",
+        ).filter(status=ApprovalStepStatus.PENDING)
+
+        if user.is_superuser:
+            return queryset.order_by("sequence", "-payment_request__created_at")
+
+        if not getattr(user, "primary_company_id", None):
+            return queryset.none()
+
+        return queryset.filter(
+            required_role=user.role,
+            payment_request__company_id=user.primary_company_id,
+        ).order_by("sequence", "-payment_request__created_at")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pending_count"] = self.object_list.count()
+        return context
 
 
 class ApprovalStepActionView(LoginRequiredMixin, View):

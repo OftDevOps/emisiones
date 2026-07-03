@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Pendientes por aprobar</h1>
+
+<p>
+  <strong>Total pendiente:</strong> {{ pending_count }}
+</p>
+
+{% if pending_steps %}
+  <table>
+    <thead>
+      <tr>
+        <th>Solicitud</th>
+        <th>Empresa</th>
+        <th>Beneficiario</th>
+        <th>Concepto</th>
+        <th>Solicitante</th>
+        <th>Monto</th>
+        <th>Estado solicitud</th>
+        <th>Paso</th>
+        <th>Rol requerido</th>
+        <th>Creada</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for step in pending_steps %}
+        <tr>
+          <td>#{{ step.payment_request.id }}</td>
+          <td>{{ step.payment_request.company }}</td>
+          <td>{{ step.payment_request.beneficiary }}</td>
+          <td>{{ step.payment_request.concept }}</td>
+          <td>{{ step.payment_request.requested_by }}</td>
+          <td>{{ step.payment_request.amount }} {{ step.payment_request.currency }}</td>
+          <td>{{ step.payment_request.get_status_display }}</td>
+          <td>{{ step.sequence }}</td>
+          <td>{{ step.get_required_role_display }}</td>
+          <td>{{ step.payment_request.created_at }}</td>
+          <td>
+            <a href="{% url 'payment_requests:detail' step.payment_request.pk %}">
+              Ver solicitud
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No tienes solicitudes pendientes por aprobar.</p>
+{% endif %}
+
+<p>
+  <a href="{% url 'payment_requests:dashboard' %}">Volver al dashboard</a>
+</p>
+{% endblock %}
