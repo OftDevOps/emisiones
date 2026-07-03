@@ -1,10 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, TemplateView
+from apps.accounts.models import UserRole
 
 from apps.payment_approvals.models import (
     ApprovalActionType,
@@ -67,6 +68,34 @@ class PaymentRequestDetailView(LoginRequiredMixin, DetailView):
         context["approval_actions"] = payment_request.approval_actions.all().order_by("-created_at")
         return context
 
+
+
+
+class AccountsPayablePendingView(LoginRequiredMixin, ListView):
+    model = PaymentRequest
+    template_name = "payment_requests/accounts_payable_pending.html"
+    context_object_name = "payment_requests"
+    paginate_by = 25
+
+    def dispatch(self, request, *args, **kwargs):
+        user = request.user
+        if not user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+
+        if not user.is_superuser and user.role != UserRole.CUENTAS_POR_PAGAR:
+            raise PermissionDenied("Su rol no permite acceder a Cuentas por Pagar.")
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return scoped_payment_request_queryset(self.request.user).filter(
+            status=PaymentRequestStatus.APPROVED,
+        ).order_by("due_date", "-updated_at", "-created_at")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pending_payment_count"] = self.object_list.count()
+        return context
 
 
 class PaymentRequestDashboardView(LoginRequiredMixin, TemplateView):

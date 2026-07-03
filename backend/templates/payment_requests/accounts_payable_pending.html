@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Cuentas por Pagar</h1>
+<h2>Pagos aprobados pendientes por ejecutar</h2>
+
+<p><strong>Total pendiente:</strong> {{ pending_payment_count }}</p>
+
+{% if payment_requests %}
+<table>
+  <thead>
+    <tr>
+      <th>Solicitud</th>
+      <th>Empresa</th>
+      <th>Beneficiario</th>
+      <th>Solicitante</th>
+      <th>Concepto</th>
+      <th>Monto</th>
+      <th>Fecha requerida</th>
+      <th>Estado</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for payment_request in payment_requests %}
+    <tr>
+      <td>#{{ payment_request.id }}</td>
+      <td>{{ payment_request.company }}</td>
+      <td>{{ payment_request.beneficiary }}</td>
+      <td>{{ payment_request.requested_by }}</td>
+      <td>{{ payment_request.concept }}</td>
+      <td>{{ payment_request.amount }} {{ payment_request.currency }}</td>
+      <td>{{ payment_request.due_date|default:"Sin fecha" }}</td>
+      <td>{{ payment_request.get_status_display }}</td>
+      <td><a href="{% url 'payment_requests:detail' payment_request.pk %}">Ver solicitud</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No hay pagos aprobados pendientes por ejecutar.</p>
+{% endif %}
+
+<p><a href="{% url 'payment_requests:dashboard' %}">Volver al dashboard</a></p>
+{% endblock %}
