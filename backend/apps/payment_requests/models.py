@@ -12,6 +12,7 @@ class PaymentRequestStatus(models.TextChoices):
     FINANCE_REVIEW = "FINANCE_REVIEW", "Revisión finanzas"
     MANAGEMENT_REVIEW = "MANAGEMENT_REVIEW", "Revisión gerencia"
     APPROVED = "APPROVED", "Aprobada"
+    PAID = "PAID", "Pagada"
     REJECTED = "REJECTED", "Rechazada"
     CANCELLED = "CANCELLED", "Cancelada"
 

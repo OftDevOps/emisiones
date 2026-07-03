@@ -90,6 +90,7 @@ class AccountsPayablePendingView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return scoped_payment_request_queryset(self.request.user).filter(
             status=PaymentRequestStatus.APPROVED,
+            payment_execution__isnull=True,
         ).order_by("due_date", "-updated_at", "-created_at")
 
     def get_context_data(self, **kwargs):

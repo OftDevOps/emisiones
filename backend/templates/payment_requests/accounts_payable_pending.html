@@ -32,7 +32,7 @@
       <td>{{ payment_request.amount }} {{ payment_request.currency }}</td>
       <td>{{ payment_request.due_date|default:"Sin fecha" }}</td>
       <td>{{ payment_request.get_status_display }}</td>
-      <td><a href="{% url 'payment_requests:detail' payment_request.pk %}">Ver solicitud</a></td>
+      <td><a href="{% url 'payment_requests:detail' payment_request.pk %}">Ver solicitud</a> | <a href="{% url 'payment_requests:execute_payment' payment_request.pk %}">Registrar pago</a></td>
     </tr>
     {% endfor %}
   </tbody>
