@@ -15,6 +15,7 @@ class ApprovalStepStatus(models.TextChoices):
 
 
 class ApprovalActionType(models.TextChoices):
+    PAYMENT_EXECUTED = "PAYMENT_EXECUTED", "Pago ejecutado"
     SUBMIT = "SUBMIT", "Enviar"
     APPROVE = "APPROVE", "Aprobar"
     REJECT = "REJECT", "Rechazar"

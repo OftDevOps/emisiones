@@ -4,8 +4,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from apps.payment_approvals.models import ApprovalActionType, PaymentApprovalAction
 from apps.payment_requests.models import PaymentRequest, PaymentRequestStatus
-
 
 class PaymentExecution(models.Model):
     payment_request = models.OneToOneField(
@@ -27,6 +27,29 @@ class PaymentExecution(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="creado")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="actualizado")
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        self.full_clean()
+        result = super().save(*args, **kwargs)
+
+        if self.payment_request.status != PaymentRequestStatus.PAID:
+            self.payment_request.status = PaymentRequestStatus.PAID
+            self.payment_request.save(update_fields=["status", "updated_at"])
+
+        if is_new:
+            PaymentApprovalAction.objects.create(
+                payment_request=self.payment_request,
+                action=ApprovalActionType.PAYMENT_EXECUTED,
+                performed_by=self.executed_by,
+                role=self.executed_by.role,
+                comment=(
+                    f"Pago ejecutado. Referencia bancaria: {self.bank_reference}. "
+                    f"Monto pagado: {self.paid_amount}."
+                ),
+            )
+
+        return result
+
     class Meta:
         ordering = ["-paid_at", "-created_at", "-id"]
         verbose_name = "ejecucion de pago"
@@ -42,14 +65,6 @@ class PaymentExecution(models.Model):
             raise ValidationError({"paid_amount": "El monto pagado debe ser mayor que cero."})
         if not self.pk and self.payment_request_id and self.payment_request.status != PaymentRequestStatus.APPROVED:
             raise ValidationError("Solo solicitudes aprobadas pueden registrarse como pagadas.")
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        result = super().save(*args, **kwargs)
-        if self.payment_request.status != PaymentRequestStatus.PAID:
-            self.payment_request.status = PaymentRequestStatus.PAID
-            self.payment_request.save(update_fields=["status", "updated_at"])
-        return result
 
     def __str__(self) -> str:
         return f"{self.payment_request_id} - {self.paid_amount} - {self.bank_reference}"
