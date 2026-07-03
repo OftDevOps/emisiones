@@ -64,8 +64,20 @@ class PaymentRequestDetailView(LoginRequiredMixin, DetailView):
                 and payment_request.company_id == getattr(user, "primary_company_id", None)
             )
 
+        payment_execution = getattr(payment_request, "payment_execution", None)
+        can_execute_payment = (
+            payment_execution is None
+            and payment_request.status == PaymentRequestStatus.APPROVED
+            and (
+                user.is_superuser
+                or user.role == UserRole.CUENTAS_POR_PAGAR
+            )
+        )
+
         context["approval_steps"] = approval_steps
         context["approval_actions"] = payment_request.approval_actions.all().order_by("-created_at")
+        context["payment_execution"] = payment_execution
+        context["can_execute_payment"] = can_execute_payment
         return context
 
 

@@ -1,6 +1,52 @@
 {% extends "base.html" %}
 
-{% block title %}Solicitud de pago #{{ payment_request.id }}{% endblock %}
+{% block title %}Solicitud de pago #{{ payment_request.id }}
+<section>
+  <h2>Ejecución de pago</h2>
+
+  {% if payment_execution %}
+    <table>
+      <tbody>
+        <tr>
+          <th>Fecha de pago</th>
+          <td>{{ payment_execution.paid_at }}</td>
+        </tr>
+        <tr>
+          <th>Monto pagado</th>
+          <td>{{ payment_execution.paid_amount|stringformat:".2f" }} {{ payment_request.currency }}</td>
+        </tr>
+        <tr>
+          <th>Referencia bancaria</th>
+          <td>{{ payment_execution.bank_reference }}</td>
+        </tr>
+        <tr>
+          <th>Observación</th>
+          <td>{{ payment_execution.note|default:"Sin observación" }}</td>
+        </tr>
+        <tr>
+          <th>Ejecutado por</th>
+          <td>{{ payment_execution.executed_by }}</td>
+        </tr>
+        <tr>
+          <th>Registrado</th>
+          <td>{{ payment_execution.created_at }}</td>
+        </tr>
+      </tbody>
+    </table>
+  {% else %}
+    <p>No hay ejecución de pago registrada.</p>
+
+    {% if can_execute_payment %}
+      <p>
+        <a href="{% url 'payment_requests:execute_payment' payment_request.pk %}">
+          Registrar pago
+        </a>
+      </p>
+    {% endif %}
+  {% endif %}
+</section>
+
+{% endblock %}
 
 {% block content %}
 <h1>Solicitud de pago #{{ payment_request.id }}</h1>
