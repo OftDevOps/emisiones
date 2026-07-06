@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html lang="es">
 <head>
@@ -20,8 +21,9 @@
         dt { font-weight: 700; }
         dd { margin: 0; }
     </style>
+    <link rel="stylesheet" href="{% static 'css/oftalmi_branding.css' %}">
 </head>
-<body>
+<body class="oftalmi-shell">
 <header>
     <strong>Emisiones | Rutas de Pago Oftalmi</strong>
     {% if request.user.is_authenticated %}
