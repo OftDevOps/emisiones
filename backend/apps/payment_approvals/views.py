@@ -1,3 +1,6 @@
+from apps.accounts.role_permissions import (
+    user_has_permission,
+)
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -11,6 +14,11 @@ from .models import (
     PaymentApprovalAction,
     PaymentApprovalStep,
 )
+
+
+def _require_operational_permission(user, permission: str, message: str) -> None:
+    if not user_has_permission(user, permission):
+        raise PermissionDenied(message)
 
 
 class PendingApprovalStepsView(LoginRequiredMixin, ListView):
@@ -159,4 +167,3 @@ class CrossActionAuditWorkbenchView(LoginRequiredMixin, ListView):
         }
         context["total_actions"] = self.object_list.count()
         return context
-

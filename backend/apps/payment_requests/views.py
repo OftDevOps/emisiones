@@ -1,3 +1,8 @@
+from apps.accounts.role_permissions import (
+    PERM_VIEW_PAYMENT_REQUEST_DASHBOARD,
+    PERM_VIEW_PAYMENT_REQUESTS,
+    user_has_permission,
+)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count
@@ -18,6 +23,13 @@ from .forms import PaymentRequestCreateForm
 from .models import PaymentRequest, PaymentRequestStatus
 
 
+def _require_operational_permission(user, permission: str, message: str) -> None:
+    if not getattr(user, "is_authenticated", False):
+        return
+    if not user_has_permission(user, permission):
+        raise PermissionDenied(message)
+
+
 def scoped_payment_request_queryset(user):
     queryset = PaymentRequest.objects.select_related("company", "beneficiary", "requested_by")
 
@@ -31,6 +43,14 @@ def scoped_payment_request_queryset(user):
 
 
 class PaymentRequestListView(LoginRequiredMixin, ListView):
+
+    def dispatch(self, request, *args, **kwargs):
+        _require_operational_permission(
+            request.user,
+            PERM_VIEW_PAYMENT_REQUESTS,
+            "Su rol no permite consultar solicitudes de pago.",
+        )
+        return super().dispatch(request, *args, **kwargs)
     model = PaymentRequest
     template_name = "payment_requests/paymentrequest_list.html"
     context_object_name = "payment_requests"
@@ -112,6 +132,14 @@ class AccountsPayablePendingView(LoginRequiredMixin, ListView):
 
 
 class PaymentRequestDashboardView(LoginRequiredMixin, TemplateView):
+
+    def dispatch(self, request, *args, **kwargs):
+        _require_operational_permission(
+            request.user,
+            PERM_VIEW_PAYMENT_REQUEST_DASHBOARD,
+            "Su rol no permite acceder al dashboard de solicitudes.",
+        )
+        return super().dispatch(request, *args, **kwargs)
     template_name = "payment_requests/paymentrequest_dashboard.html"
 
     def get_context_data(self, **kwargs):
