@@ -1,4 +1,5 @@
 from apps.accounts.role_permissions import (
+    PERM_VIEW_AUDIT_WORKBENCH,
     user_has_permission,
 )
 from django.contrib import messages
@@ -102,6 +103,15 @@ class ApprovalStepActionView(LoginRequiredMixin, View):
         return redirect("payment_requests:detail", pk=payment_request.pk)
 
 class CrossActionAuditWorkbenchView(LoginRequiredMixin, ListView):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            _require_operational_permission(
+                request.user,
+                PERM_VIEW_AUDIT_WORKBENCH,
+                "Su rol no permite acceder a la auditoria de acciones criticas.",
+            )
+        return super().dispatch(request, *args, **kwargs)
+
     model = PaymentApprovalAction
     template_name = "payment_approvals/cross_action_audit_workbench.html"
     context_object_name = "actions"

@@ -16,15 +16,15 @@ class CrossActionAuditWorkbenchTests(TestCase):
         self.other_company = Company.objects.create(name="Otra Empresa", code="OTH")
 
         self.cxp_user = CustomUser.objects.create_user(
-            email="cxp.audit@oftalmi.com",
+            email="auditor.audit@oftalmi.com",
             password="test-pass-123",
-            role=UserRole.CUENTAS_POR_PAGAR,
+            role=UserRole.AUDITOR,
             primary_company=self.company,
         )
         self.other_user = CustomUser.objects.create_user(
-            email="cxp.audit.otra@oftalmi.com",
+            email="auditor.audit.otra@oftalmi.com",
             password="test-pass-123",
-            role=UserRole.CUENTAS_POR_PAGAR,
+            role=UserRole.AUDITOR,
             primary_company=self.other_company,
         )
         self.superuser = CustomUser.objects.create_superuser(
@@ -70,14 +70,14 @@ class CrossActionAuditWorkbenchTests(TestCase):
             payment_request=self.payment_request,
             action=ApprovalActionType.PAYMENT_EXECUTED,
             performed_by=self.cxp_user,
-            role=UserRole.CUENTAS_POR_PAGAR,
+            role=UserRole.AUDITOR,
             comment="Pago ejecutado REF-AUDIT-01",
         )
         self.other_company_action = PaymentApprovalAction.objects.create(
             payment_request=self.other_payment_request,
             action=ApprovalActionType.REJECT,
             performed_by=self.other_user,
-            role=UserRole.CUENTAS_POR_PAGAR,
+            role=UserRole.AUDITOR,
             comment="Rechazo otra empresa",
         )
 
