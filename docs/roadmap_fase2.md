@@ -19,7 +19,7 @@ Prioridad estrategica: primero control y permisos; luego reportes; finalmente va
 | 6 | F2-P06 | Estados y transiciones documentadas |
 | 7 | F2-P07 | Validacion tecnica de transiciones |
 | 8 | F2-P08 | Dashboard operativo mejorado por rol |
-| 9 | F2-P09 | Reporte basico por estado, empresa y fecha |
+| 9 | F2-P09 | Cerrado - Reporte basico por estado, empresa y fecha |
 | 10 | F2-P10 | Exportacion operativa basica |
 | 11 | F2-P11 | Auditoria extendida |
 | 12 | F2-P12 | Paquete de validacion con usuarios internos |
@@ -31,10 +31,10 @@ Fase 2 no debe arrancar creando funcionalidades sueltas. Debe arrancar por matri
 
 ## Siguiente accion
 
-Ejecutar F2-P09 con foco en:
+Ejecutar F2-P10 con foco en:
 
-- Reporte basico por estado, empresa y fecha.
-- Filtros operativos coherentes con alcance por empresa.
-- Reporte visible solo para roles autorizados.
+- Exportacion operativa basica del reporte.
+- Reutilizar filtros de estado, empresa y fecha.
+- Mantener alcance por empresa y permisos centralizados.
 - Sin modelos nuevos salvo necesidad justificada.
 - Sin migraciones salvo necesidad justificada.

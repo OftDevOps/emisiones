@@ -20,7 +20,11 @@
       {% if role_nav.can_view_audit_workbench %}
         <li><a href="{% url 'payment_approvals:audit' %}">Auditoría de acciones críticas</a></li>
       {% endif %}
-      {% if role_nav.can_view_accounts_payable %}
+
+      {% if role_nav.can_view_payment_request_report %}
+        <a href="{% url 'payment_requests:report' %}" class="btn btn-outline-primary">Reporte operativo</a>
+      {% endif %}
+{% if role_nav.can_view_accounts_payable %}
         <li><a href="{% url 'payment_requests:accounts_payable' %}">Cuentas por Pagar</a></li>
       {% endif %}
     </ul>

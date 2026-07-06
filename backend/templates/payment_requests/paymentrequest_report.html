@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Reporte operativo de solicitudes{% endblock %}
+
+{% block content %}
+<section class="card">
+  <div class="card-body">
+    <h1>Reporte operativo de solicitudes</h1>
+    <p>Consulta basica por estado, empresa y fecha de vencimiento.</p>
+
+    <form method="get" class="row g-3 mb-4">
+      <div class="col-md-3">
+        <label for="status" class="form-label">Estado</label>
+        <select id="status" name="status" class="form-select">
+          <option value="">Todos</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if filter_status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="company" class="form-label">Empresa</label>
+        <select id="company" name="company" class="form-select">
+          <option value="">Todas disponibles</option>
+          {% for company in available_companies %}
+            <option value="{{ company.pk }}" {% if filter_company == company.pk|stringformat:"s" %}selected{% endif %}>{{ company.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="date_from" class="form-label">Desde</label>
+        <input id="date_from" type="date" name="date_from" value="{{ filter_date_from }}" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <label for="date_to" class="form-label">Hasta</label>
+        <input id="date_to" type="date" name="date_to" value="{{ filter_date_to }}" class="form-control">
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+      </div>
+    </form>
+
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="border rounded p-3">
+          <strong>Total solicitudes</strong>
+          <div>{{ total_requests }}</div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="border rounded p-3">
+          <strong>Monto total</strong>
+          <div>{{ total_amount }}</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Resumen por empresa y estado</h2>
+    <table class="table table-sm table-striped">
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Estado</th>
+          <th>Cantidad</th>
+          <th>Monto</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in summary_rows %}
+          <tr>
+            <td>{{ row.company__name }}</td>
+            <td>{{ row.status }}</td>
+            <td>{{ row.total }}</td>
+            <td>{{ row.amount }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">Sin solicitudes para los filtros seleccionados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2>Detalle operativo</h2>
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>Empresa</th>
+          <th>Beneficiario</th>
+          <th>Concepto</th>
+          <th>Estado</th>
+          <th>Fecha vencimiento</th>
+          <th>Monto</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for request in payment_requests %}
+          <tr>
+            <td>{{ request.company.name }}</td>
+            <td>{{ request.beneficiary }}</td>
+            <td>{{ request.concept }}</td>
+            <td>{{ request.get_status_display }}</td>
+            <td>{{ request.due_date|default:"-" }}</td>
+            <td>{{ request.amount }} {{ request.currency }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">Sin detalle disponible.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

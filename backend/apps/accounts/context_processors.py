@@ -4,6 +4,7 @@ from apps.accounts.role_permissions import (
     PERM_VIEW_AUDIT_WORKBENCH,
     PERM_VIEW_PAYMENT_REQUEST_DASHBOARD,
     PERM_VIEW_PAYMENT_REQUESTS,
+    PERM_VIEW_PAYMENT_REQUEST_REPORT,
     PERM_VIEW_PENDING_APPROVALS,
     user_has_permission,
 )
@@ -25,6 +26,7 @@ def role_navigation(request):
         "can_view_pending_approvals": user_has_permission(user, PERM_VIEW_PENDING_APPROVALS),
         "can_view_audit_workbench": user_has_permission(user, PERM_VIEW_AUDIT_WORKBENCH),
         "can_view_accounts_payable": user_has_permission(user, PERM_VIEW_ACCOUNTS_PAYABLE),
+            "can_view_payment_request_report": user_has_permission(user, PERM_VIEW_PAYMENT_REQUEST_REPORT),
     }
 
     return {"role_nav": nav_permissions}

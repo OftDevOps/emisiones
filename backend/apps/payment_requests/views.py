@@ -3,16 +3,19 @@ from apps.accounts.role_permissions import (
     PERM_VIEW_ACCOUNTS_PAYABLE,
     PERM_VIEW_PAYMENT_REQUEST_DASHBOARD,
     PERM_VIEW_PAYMENT_REQUESTS,
+    PERM_VIEW_PAYMENT_REQUEST_REPORT,
     user_has_permission,
 )
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils.dateparse import parse_date
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, TemplateView
 from apps.accounts.models import UserRole
+from apps.organization.models import Company
 
 from apps.payment_approvals.models import (
     ApprovalActionType,
@@ -45,6 +48,10 @@ def scoped_payment_request_queryset(user):
 
 
 class PaymentRequestListView(LoginRequiredMixin, ListView):
+    model = PaymentRequest
+    template_name = "payment_requests/paymentrequest_list.html"
+    context_object_name = "payment_requests"
+    paginate_by = 20
 
     def dispatch(self, request, *args, **kwargs):
         _require_operational_permission(
@@ -53,10 +60,6 @@ class PaymentRequestListView(LoginRequiredMixin, ListView):
             "Su rol no permite consultar solicitudes de pago.",
         )
         return super().dispatch(request, *args, **kwargs)
-    model = PaymentRequest
-    template_name = "payment_requests/paymentrequest_list.html"
-    context_object_name = "payment_requests"
-    paginate_by = 20
 
     def get_queryset(self):
         return scoped_payment_request_queryset(self.request.user).order_by("-created_at")
@@ -134,6 +137,83 @@ class AccountsPayablePendingView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["pending_payment_count"] = self.object_list.count()
+        return context
+
+
+
+
+class PaymentRequestReportView(LoginRequiredMixin, TemplateView):
+    """Basic operational report filtered by status, company and due date."""
+
+    template_name = "payment_requests/paymentrequest_report.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        _require_operational_permission(
+            request.user,
+            PERM_VIEW_PAYMENT_REQUEST_REPORT,
+            "Su rol no permite acceder al reporte operativo de solicitudes.",
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_filtered_queryset(self):
+        queryset = scoped_payment_request_queryset(self.request.user)
+        status = self.request.GET.get("status", "").strip()
+        company_id = self.request.GET.get("company", "").strip()
+        date_from = parse_date(self.request.GET.get("date_from", ""))
+        date_to = parse_date(self.request.GET.get("date_to", ""))
+
+        valid_statuses = {choice[0] for choice in PaymentRequestStatus.choices}
+        if status in valid_statuses:
+            queryset = queryset.filter(status=status)
+
+        if company_id:
+            queryset = queryset.filter(company_id=company_id)
+
+        if date_from:
+            queryset = queryset.filter(due_date__gte=date_from)
+
+        if date_to:
+            queryset = queryset.filter(due_date__lte=date_to)
+
+        return queryset.order_by("company__name", "status", "due_date", "-created_at")
+
+    def get_available_companies(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Company.objects.all().order_by("name")
+        if getattr(user, "primary_company_id", None):
+            return Company.objects.filter(pk=user.primary_company_id).order_by("name")
+        return Company.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        payment_requests = self.get_filtered_queryset()
+        totals = payment_requests.aggregate(
+            total_requests=Count("id"),
+            total_amount=Sum("amount"),
+        )
+        summary_rows = payment_requests.values(
+            "company__name",
+            "status",
+        ).annotate(
+            total=Count("id"),
+            amount=Sum("amount"),
+        ).order_by("company__name", "status")
+
+        context.update(
+            {
+                "payment_requests": payment_requests[:100],
+                "summary_rows": summary_rows,
+                "total_requests": totals["total_requests"] or 0,
+                "total_amount": totals["total_amount"] or 0,
+                "status_choices": PaymentRequestStatus.choices,
+                "available_companies": self.get_available_companies(),
+                "filter_status": self.request.GET.get("status", ""),
+                "filter_company": self.request.GET.get("company", ""),
+                "filter_date_from": self.request.GET.get("date_from", ""),
+                "filter_date_to": self.request.GET.get("date_to", ""),
+            }
+        )
         return context
 
 

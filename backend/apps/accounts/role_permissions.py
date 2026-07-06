@@ -29,6 +29,7 @@ PERM_VIEW_PENDING_APPROVALS = "payment_approvals.view_pending"
 PERM_EXECUTE_APPROVAL_ACTION = "payment_approvals.execute_action"
 PERM_VIEW_AUDIT_WORKBENCH = "payment_approvals.view_audit"
 PERM_VIEW_ACCOUNTS_PAYABLE = "payment_requests.view_accounts_payable"
+PERM_VIEW_PAYMENT_REQUEST_REPORT = "payment_requests.view_report"
 PERM_REGISTER_PAYMENT_EXECUTION = "payment_execution.register_payment"
 
 ALL_ROLES = {
@@ -73,6 +74,12 @@ PERMISSION_MATRIX: dict[str, set[str]] = {
         ROLE_ADMINISTRADOR,
         ROLE_CUENTAS_POR_PAGAR,
         ROLE_FINANZAS,
+    },
+    PERM_VIEW_PAYMENT_REQUEST_REPORT: {
+        ROLE_ADMINISTRADOR,
+        ROLE_FINANZAS,
+        ROLE_CUENTAS_POR_PAGAR,
+        ROLE_AUDITOR,
     },
     PERM_REGISTER_PAYMENT_EXECUTION: {
         ROLE_ADMINISTRADOR,
