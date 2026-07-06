@@ -33,9 +33,32 @@
         </form>
     {% endif %}
 </header>
+
+{% if request.user.is_authenticated %}
+<nav class="oftalmi-nav" aria-label="Navegación principal">
+    {% if role_nav.can_view_payment_dashboard %}
+        <a class="nav-link" href="{% url 'payment_requests:dashboard' %}">Solicitudes</a>
+    {% endif %}
+    {% if role_nav.can_view_payment_requests %}
+        <a class="nav-link" href="{% url 'payment_requests:list' %}">Listado</a>
+    {% endif %}
+    {% if role_nav.can_create_payment_request %}
+        <a class="nav-link" href="{% url 'payment_requests:create' %}">Nueva solicitud</a>
+    {% endif %}
+    {% if role_nav.can_view_pending_approvals %}
+        <a class="nav-link" href="{% url 'payment_approvals:pending' %}">Aprobaciones</a>
+    {% endif %}
+    {% if role_nav.can_view_accounts_payable %}
+        <a class="nav-link" href="{% url 'payment_requests:accounts_payable' %}">Cuentas por pagar</a>
+    {% endif %}
+    {% if role_nav.can_view_audit_workbench %}
+        <a class="nav-link" href="{% url 'payment_approvals:audit' %}">Auditoria</a>
+    {% endif %}
+</nav>
+{% endif %}
+
 <main>
     {% block content %}{% endblock %}
 </main>
-<p><a href="{% url 'payment_requests:list' %}">Solicitudes de pago</a></p>
 </body>
 </html>
