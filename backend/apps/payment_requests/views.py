@@ -1,4 +1,6 @@
 from apps.accounts.role_permissions import (
+    PERM_VIEW_AUDIT_WORKBENCH,
+    PERM_VIEW_ACCOUNTS_PAYABLE,
     PERM_VIEW_PAYMENT_REQUEST_DASHBOARD,
     PERM_VIEW_PAYMENT_REQUESTS,
     user_has_permission,
@@ -114,8 +116,12 @@ class AccountsPayablePendingView(LoginRequiredMixin, ListView):
         if not user.is_authenticated:
             return super().dispatch(request, *args, **kwargs)
 
-        if not user.is_superuser and user.role != UserRole.CUENTAS_POR_PAGAR:
-            raise PermissionDenied("Su rol no permite acceder a Cuentas por Pagar.")
+        if not user.is_superuser:
+            _require_operational_permission(
+                user,
+                PERM_VIEW_ACCOUNTS_PAYABLE,
+                "Su rol no permite acceder a Cuentas por Pagar.",
+            )
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -169,10 +175,32 @@ class PaymentRequestDashboardView(LoginRequiredMixin, TemplateView):
             payment_request__in=payment_requests,
         ).order_by("sequence", "-payment_request__created_at")[:10]
 
+        pending_payment_requests = payment_requests.filter(
+            status=PaymentRequestStatus.APPROVED,
+            payment_execution__isnull=True,
+        ).order_by("due_date", "-updated_at", "-created_at")[:10]
+
+        audit_action_count = (
+            PaymentApprovalAction.objects.filter(payment_request__in=payment_requests).count()
+            if user_has_permission(user, PERM_VIEW_AUDIT_WORKBENCH)
+            else 0
+        )
+
         context["total_requests"] = payment_requests.count()
         context["status_cards"] = status_cards
         context["latest_requests"] = payment_requests.order_by("-created_at")[:10]
         context["pending_approval_steps"] = pending_steps
+        context["pending_payment_requests"] = pending_payment_requests
+        context["pending_payment_count"] = pending_payment_requests.count()
+        context["audit_action_count"] = audit_action_count
+        context["dashboard_role_label"] = user.get_role_display() if hasattr(user, "get_role_display") else user.role
+        context["dashboard_scope_label"] = (
+            "Todas las empresas"
+            if user.is_superuser
+            else str(user.primary_company)
+            if getattr(user, "primary_company_id", None)
+            else "Sin empresa primaria asignada"
+        )
         return context
 
 

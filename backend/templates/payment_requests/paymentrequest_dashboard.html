@@ -4,12 +4,29 @@
 <h1>Dashboard operativo de solicitudes</h1>
 
 <section>
+  <h2>Perfil operativo</h2>
+  <p><strong>Rol:</strong> {{ dashboard_role_label }}</p>
+  <p><strong>Alcance:</strong> {{ dashboard_scope_label }}</p>
+</section>
+
+<section>
   <h2>Accesos operativos</h2>
-  <ul>
-    <li><a href="{% url 'payment_approvals:pending' %}">Pendientes por aprobar</a></li>
-    <li><a href="{% url 'payment_approvals:audit' %}">Auditoría de acciones críticas</a></li>
-    <li><a href="{% url 'payment_requests:accounts_payable' %}">Cuentas por Pagar</a></li>
-  </ul>
+
+  {% if role_nav.can_view_pending_approvals or role_nav.can_view_audit_workbench or role_nav.can_view_accounts_payable %}
+    <ul>
+      {% if role_nav.can_view_pending_approvals %}
+        <li><a href="{% url 'payment_approvals:pending' %}">Pendientes por aprobar</a></li>
+      {% endif %}
+      {% if role_nav.can_view_audit_workbench %}
+        <li><a href="{% url 'payment_approvals:audit' %}">Auditoría de acciones críticas</a></li>
+      {% endif %}
+      {% if role_nav.can_view_accounts_payable %}
+        <li><a href="{% url 'payment_requests:accounts_payable' %}">Cuentas por Pagar</a></li>
+      {% endif %}
+    </ul>
+  {% else %}
+    <p>No tienes accesos operativos adicionales para tu rol.</p>
+  {% endif %}
 </section>
 
 <section>
@@ -25,6 +42,52 @@
     {% endfor %}
   </div>
 </section>
+
+{% if role_nav.can_view_accounts_payable %}
+<section>
+  <h2>Solicitudes aprobadas pendientes de pago</h2>
+  <p><strong>Total pendiente de pago:</strong> {{ pending_payment_count }}</p>
+
+  {% if pending_payment_requests %}
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Empresa</th>
+          <th>Beneficiario</th>
+          <th>Monto</th>
+          <th>Fecha estimada</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for payment_request in pending_payment_requests %}
+          <tr>
+            <td>#{{ payment_request.id }}</td>
+            <td>{{ payment_request.company }}</td>
+            <td>{{ payment_request.beneficiary }}</td>
+            <td>{{ payment_request.amount }} {{ payment_request.currency }}</td>
+            <td>{{ payment_request.due_date|default:"Sin fecha" }}</td>
+            <td>
+              <a href="{% url 'payment_requests:detail' payment_request.pk %}">Ver solicitud</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No hay solicitudes aprobadas pendientes de pago.</p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if role_nav.can_view_audit_workbench %}
+<section>
+  <h2>Auditoría operativa</h2>
+  <p><strong>Acciones registradas en el alcance:</strong> {{ audit_action_count }}</p>
+  <p><a href="{% url 'payment_approvals:audit' %}">Ir a auditoría de acciones críticas</a></p>
+</section>
+{% endif %}
 
 <section>
   <h2>Pendientes de aprobación para mi rol</h2>

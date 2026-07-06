@@ -109,9 +109,16 @@ class AccountsPayablePendingViewTests(TestCase):
         self.assertEqual(list(response.context["payment_requests"]), [payment_request])
         self.assertContains(response, "Pago aprobado visible")
 
-    def test_non_accounts_payable_user_gets_403(self):
-        self.client.force_login(self.finance_user)
+    def test_user_without_accounts_payable_permission_gets_403(self):
+        requester_user = self.create_user(
+            "solicitante.cxp@oftalmi.com",
+            self.company,
+            UserRole.SOLICITANTE,
+        )
+        self.client.force_login(requester_user)
+
         response = self.client.get(self.url)
+
         self.assertEqual(response.status_code, 403)
 
     def test_only_lists_approved_requests(self):
@@ -159,3 +166,16 @@ class AccountsPayablePendingViewTests(TestCase):
         self.assertEqual(list(response.context["payment_requests"]), [own_request])
         self.assertContains(response, "Pago empresa propia")
         self.assertNotContains(response, "Pago otra empresa")
+
+    def test_finance_user_can_access_accounts_payable_per_permission_matrix(self):
+        finance_user = self.create_user(
+            "finanzas.cxp@oftalmi.com",
+            self.company,
+            UserRole.FINANZAS,
+        )
+        self.client.force_login(finance_user)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "payment_requests/accounts_payable_pending.html")

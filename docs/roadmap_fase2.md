@@ -31,10 +31,10 @@ Fase 2 no debe arrancar creando funcionalidades sueltas. Debe arrancar por matri
 
 ## Siguiente accion
 
-Ejecutar F2-P08 con foco en:
+Ejecutar F2-P09 con foco en:
 
-- Dashboard operativo por rol.
-- Indicadores visibles segun permisos.
-- Enlaces de accion coherentes con la matriz UX-permisos.
+- Reporte basico por estado, empresa y fecha.
+- Filtros operativos coherentes con alcance por empresa.
+- Reporte visible solo para roles autorizados.
 - Sin modelos nuevos salvo necesidad justificada.
 - Sin migraciones salvo necesidad justificada.

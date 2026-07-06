@@ -230,7 +230,7 @@ class PaymentRequestDashboardViewTests(TestCase):
         self.assertContains(response, "Pendiente finanzas")
         self.assertNotContains(response, "Pendiente otra empresa")
 
-    def test_dashboard_shows_operational_access_links(self):
+    def test_dashboard_shows_operational_access_links_by_role(self):
         self.client.force_login(self.user)
 
         response = self.client.get(self.url)
@@ -238,9 +238,59 @@ class PaymentRequestDashboardViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Accesos operativos")
         self.assertContains(response, "Pendientes por aprobar")
-        self.assertContains(response, "Auditoría de acciones críticas")
         self.assertContains(response, "Cuentas por Pagar")
         self.assertContains(response, reverse("payment_approvals:pending"))
-        self.assertContains(response, reverse("payment_approvals:audit"))
         self.assertContains(response, reverse("payment_requests:accounts_payable"))
+        self.assertNotContains(response, "Auditoría de acciones críticas")
+        self.assertNotContains(response, reverse("payment_approvals:audit"))
+
+    def test_dashboard_hides_operational_links_for_solicitante(self):
+        solicitante = self.create_user(
+            "solicitante.dashboard@example.com",
+            self.company,
+            UserRole.SOLICITANTE,
+        )
+        self.client.force_login(solicitante)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No tienes accesos operativos adicionales para tu rol.")
+        self.assertNotContains(response, "Pendientes por aprobar")
+        self.assertNotContains(response, "Auditoría de acciones críticas")
+        self.assertNotContains(response, "Cuentas por Pagar")
+
+    def test_dashboard_shows_audit_panel_only_for_auditor(self):
+        auditor = self.create_user(
+            "auditor.dashboard@example.com",
+            self.company,
+            UserRole.AUDITOR,
+        )
+        self.client.force_login(auditor)
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Auditoría operativa")
+        self.assertContains(response, "Ir a auditoría de acciones críticas")
+        self.assertContains(response, reverse("payment_approvals:audit"))
+        self.assertNotContains(response, "Pendientes por aprobar")
+        self.assertNotContains(response, "Cuentas por Pagar")
+
+    def test_dashboard_shows_pending_payment_panel_for_accounts_payable_roles(self):
+        self.client.force_login(self.user)
+        self.create_payment_request(
+            self.company,
+            self.beneficiary,
+            self.user,
+            PaymentRequestStatus.APPROVED,
+            "Pago aprobado pendiente",
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Solicitudes aprobadas pendientes de pago")
+        self.assertContains(response, "Total pendiente de pago:")
+        self.assertContains(response, "Pago aprobado pendiente")
 
