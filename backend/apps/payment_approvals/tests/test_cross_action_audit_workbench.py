@@ -126,3 +126,33 @@ class CrossActionAuditWorkbenchTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Pago ejecutado REF-AUDIT-01")
         self.assertNotContains(response, "Rechazo otra empresa")
+
+    def test_filter_by_user_email(self):
+        self.client.force_login(self.superuser)
+
+        response = self.client.get(self.url(), {"user": "auditor.audit.otra"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Rechazo otra empresa")
+        self.assertNotContains(response, "Pago ejecutado REF-AUDIT-01")
+
+    def test_filter_by_request_concept(self):
+        self.client.force_login(self.superuser)
+
+        response = self.client.get(self.url(), {"request": "otra empresa"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pago auditado otra empresa")
+        self.assertContains(response, "Rechazo otra empresa")
+        self.assertNotContains(response, "Pago ejecutado REF-AUDIT-01")
+
+    def test_audit_workbench_shows_extended_summaries(self):
+        self.client.force_login(self.superuser)
+
+        response = self.client.get(self.url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Resumen por acción")
+        self.assertContains(response, "Resumen por empresa")
+        self.assertContains(response, "Concepto")
+        self.assertContains(response, "Pago auditado")

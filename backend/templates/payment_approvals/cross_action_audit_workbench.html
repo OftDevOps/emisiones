@@ -40,11 +40,73 @@
         <label class="form-label" for="id_date_to">Hasta</label>
         <input class="form-control" type="date" id="id_date_to" name="date_to" value="{{ filters.date_to }}">
       </div>
-      <div class="col-md-2 d-flex gap-2">
+      <div class="col-md-3">
+        <label class="form-label" for="id_user">Usuario</label>
+        <input class="form-control" type="search" id="id_user" name="user" value="{{ filters.user }}" placeholder="correo usuario">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="id_request">Solicitud</label>
+        <input class="form-control" type="search" id="id_request" name="request" value="{{ filters.request }}" placeholder="concepto solicitud">
+      </div>
+      <div class="col-md-3 d-flex gap-2">
         <button class="btn btn-primary" type="submit">Filtrar</button>
         <a class="btn btn-outline-secondary" href="{% url 'payment_approvals:audit' %}">Limpiar</a>
       </div>
     </form>
+  </div>
+</div>
+
+
+<div class="row mb-3">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header">Resumen por acción</div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Acción</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in action_summary %}
+              <tr>
+                <td>{{ row.action }}</td>
+                <td class="text-end">{{ row.total }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="2" class="text-muted">Sin acciones para los filtros seleccionados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header">Resumen por empresa</div>
+      <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Empresa</th>
+              <th class="text-end">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in company_summary %}
+              <tr>
+                <td>{{ row.payment_request__company__name }}</td>
+                <td class="text-end">{{ row.total }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="2" class="text-muted">Sin empresas para los filtros seleccionados.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -59,6 +121,7 @@
         <tr>
           <th>Fecha</th>
           <th>Solicitud</th>
+          <th>Concepto</th>
           <th>Empresa</th>
           <th>Acción</th>
           <th>Usuario</th>
@@ -73,6 +136,7 @@
             <td>
               <a href="{% url 'payment_requests:detail' action.payment_request.pk %}">#{{ action.payment_request.pk }}</a>
             </td>
+            <td>{{ action.payment_request.concept }}</td>
             <td>{{ action.payment_request.company.name }}</td>
             <td>{{ action.get_action_display }}</td>
             <td>{{ action.performed_by }}</td>
@@ -81,7 +145,7 @@
           </tr>
         {% empty %}
           <tr>
-            <td colspan="7" class="text-muted">No hay acciones críticas registradas.</td>
+            <td colspan="8" class="text-muted">No hay acciones críticas registradas.</td>
           </tr>
         {% endfor %}
       </tbody>

@@ -21,7 +21,7 @@ Prioridad estrategica: primero control y permisos; luego reportes; finalmente va
 | 8 | F2-P08 | Dashboard operativo mejorado por rol |
 | 9 | F2-P09 | Cerrado - Reporte basico por estado, empresa y fecha |
 | 10 | F2-P10 | Cerrado - Exportacion operativa basica |
-| 11 | F2-P11 | Auditoria extendida |
+| 11 | F2-P11 | Cerrado - Auditoria extendida |
 | 12 | F2-P12 | Paquete de validacion con usuarios internos |
 | 13 | F2-P13 | Cierre tecnico de Fase 2 |
 
@@ -31,10 +31,11 @@ Fase 2 no debe arrancar creando funcionalidades sueltas. Debe arrancar por matri
 
 ## Siguiente accion
 
-Ejecutar F2-P11 con foco en:
+Ejecutar F2-P12 con foco en:
 
-- Auditoria extendida.
-- Reforzar trazabilidad operativa sobre acciones criticas.
-- Mantener permisos centralizados.
+- Paquete de validacion con usuarios internos.
+- Escenarios operativos por rol.
+- Evidencias de flujos criticos.
+- Checklist UAT para piloto interno.
 - Sin modelos nuevos salvo necesidad justificada.
 - Sin migraciones salvo necesidad justificada.
