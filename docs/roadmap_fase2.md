@@ -22,7 +22,7 @@ Prioridad estrategica: primero control y permisos; luego reportes; finalmente va
 | 9 | F2-P09 | Cerrado - Reporte basico por estado, empresa y fecha |
 | 10 | F2-P10 | Cerrado - Exportacion operativa basica |
 | 11 | F2-P11 | Cerrado - Auditoria extendida |
-| 12 | F2-P12 | Paquete de validacion con usuarios internos |
+| 12 | F2-P12 | Cerrado - Paquete de validacion con usuarios internos |
 | 13 | F2-P13 | Cierre tecnico de Fase 2 |
 
 ## Decision de arquitectura
