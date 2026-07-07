@@ -39,3 +39,26 @@ Ejecutar F2-P12 con foco en:
 - Checklist UAT para piloto interno.
 - Sin modelos nuevos salvo necesidad justificada.
 - Sin migraciones salvo necesidad justificada.
+
+<!-- F2-P13-CIERRE-TECNICO:START -->
+
+## F2-P13 - Cierre tecnico de Fase 2
+
+Estado: **cerrado documentalmente**.
+
+Alcance aplicado:
+
+- Se consolida cierre tecnico de Fase 2.
+- Se documentan rutas operativas actuales.
+- Se documentan permisos aplicados por rol.
+- Se consolidan validaciones tecnicas ejecutadas.
+- Se registran pendientes para piloto interno, despliegue controlado y Fase 3.
+- No se crean modelos.
+- No se crean migraciones.
+- No se modifica logica funcional.
+
+Documento asociado:
+
+- `docs/f2_p13_cierre_tecnico_fase2.md`
+
+<!-- F2-P13-CIERRE-TECNICO:END -->
