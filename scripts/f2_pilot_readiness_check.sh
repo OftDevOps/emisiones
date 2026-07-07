@@ -15,7 +15,7 @@ echo "== Ultimos commits =="
 git log --oneline --max-count=8 --decorate
 
 echo "== Verificando commit base esperado =="
-if git log --oneline --max-count=20 | grep -q "3653d41 .*parametrized pilot branding and static serving"; then
+if git log --oneline --max-count=20 | grep -q "3653d41"; then
   echo "OK: commit 3653d41 presente en historial local"
 else
   echo "WARN: no se encontro commit 3653d41 en los ultimos 20 commits"
