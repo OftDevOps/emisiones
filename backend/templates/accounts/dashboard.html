@@ -14,7 +14,15 @@
 <section class="identity-grid">
     <article class="card identity-card">
         <span class="identity-label">Usuario</span>
-        <strong>{{ request.user.email }}</strong>
+        <strong>
+            {% with display_name=request.user.get_full_name %}
+                {% if display_name %}
+                    {{ display_name }}
+                {% else %}
+                    {{ request.user.email }}
+                {% endif %}
+            {% endwith %}
+        </strong>
     </article>
     <article class="card identity-card">
         <span class="identity-label">Rol</span>
