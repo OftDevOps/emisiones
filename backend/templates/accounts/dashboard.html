@@ -1,24 +1,32 @@
 {% extends "base.html" %}
 
-{% block title %}Panel principal | Emisiones{% endblock %}
+{% block title %}Panel principal | {{ app_branding.product_short_name }}{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>Panel principal</h1>
-    <p class="muted">Base autenticada del Sistema de Rutas de Pago Oftalmi.</p>
+<section class="oftalmi-page-header">
+    <div>
+        <p class="eyebrow">Panel principal</p>
+        <h1>Bienvenido a {{ app_branding.product_short_name }}</h1>
+        <p>Resumen de identidad operativa, rol y alcance organizativo del usuario autenticado.</p>
+    </div>
+</section>
 
-    <dl>
-        <dt>Usuario</dt>
-        <dd>{{ request.user.email }}</dd>
-
-        <dt>Rol</dt>
-        <dd>{{ request.user.get_role_display|default:request.user.role }}</dd>
-
-        <dt>Empresa principal</dt>
-        <dd>{{ request.user.primary_company|default:"No definida" }}</dd>
-
-        <dt>Unidad organizativa</dt>
-        <dd>{{ request.user.primary_organizational_unit|default:"No definida" }}</dd>
-    </dl>
+<section class="identity-grid">
+    <article class="card identity-card">
+        <span class="identity-label">Usuario</span>
+        <strong>{{ request.user.email }}</strong>
+    </article>
+    <article class="card identity-card">
+        <span class="identity-label">Rol</span>
+        <strong>{{ request.user.get_role_display|default:request.user.role }}</strong>
+    </article>
+    <article class="card identity-card">
+        <span class="identity-label">Empresa principal</span>
+        <strong>{{ request.user.primary_company|default:"No definida" }}</strong>
+    </article>
+    <article class="card identity-card">
+        <span class="identity-label">Unidad organizativa</span>
+        <strong>{{ request.user.primary_organizational_unit|default:"No definida" }}</strong>
+    </article>
 </section>
 {% endblock %}

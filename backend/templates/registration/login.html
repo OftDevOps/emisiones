@@ -1,25 +1,40 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Iniciar sesión | Emisiones{% endblock %}
+{% block title %}Iniciar sesión | {{ app_branding.product_short_name }}{% endblock %}
 
 {% block content %}
-<section class="card">
-    <h1>Iniciar sesión</h1>
-    <p class="muted">Acceso al Sistema de Rutas de Pago Oftalmi.</p>
+<section class="login-shell">
+    <div class="login-hero">
+        <div class="login-badge">Gestión controlada de pagos</div>
+        <h1>{{ app_branding.product_name }}</h1>
+        <p>Solicitudes, aprobaciones, Cuentas por Pagar y trazabilidad operativa en una sola plataforma.</p>
+        <div class="login-pill-row">
+            <span>Rutas aprobatorias</span>
+            <span>Auditoría</span>
+            <span>Backups</span>
+        </div>
+    </div>
 
-    {% if form.errors %}
-        <p class="errorlist">Credenciales inválidas. Verifica el correo y la contraseña.</p>
-    {% endif %}
+    <section class="card login-card">
+        <img class="login-logo" src="{% static app_branding.logo_path %}" alt="{{ app_branding.company_short_name }}">
+        <h2>Iniciar sesión</h2>
+        <p class="muted">Acceso corporativo para usuarios autorizados.</p>
 
-    <form method="post" novalidate>
-        {% csrf_token %}
-        <label for="id_username">Correo electrónico</label>
-        {{ form.username }}
+        {% if form.errors %}
+            <p class="errorlist">Credenciales inválidas. Verifica el correo y la contraseña.</p>
+        {% endif %}
 
-        <label for="id_password">Contraseña</label>
-        {{ form.password }}
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <label for="id_username">Correo electrónico</label>
+            {{ form.username }}
 
-        <button type="submit">Entrar</button>
-    </form>
+            <label for="id_password">Contraseña</label>
+            {{ form.password }}
+
+            <button class="button button-full" type="submit">Entrar</button>
+        </form>
+    </section>
 </section>
 {% endblock %}

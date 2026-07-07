@@ -1,3 +1,4 @@
+from django.conf import settings
 from apps.accounts.role_permissions import (
     PERM_CREATE_PAYMENT_REQUEST,
     PERM_VIEW_ACCOUNTS_PAYABLE,
@@ -30,3 +31,28 @@ def role_navigation(request):
     }
 
     return {"role_nav": nav_permissions}
+
+
+
+def app_branding(request):
+    """Expose company/app branding parameters to templates.
+
+    This keeps the UI reusable for separate deployments per company
+    without hardcoding visual identity in templates.
+    """
+
+    return {
+        "app_branding": {
+            "company_name": settings.APP_COMPANY_NAME,
+            "company_short_name": settings.APP_COMPANY_SHORT_NAME,
+            "product_name": settings.APP_PRODUCT_NAME,
+            "product_short_name": settings.APP_PRODUCT_SHORT_NAME,
+            "primary": settings.APP_BRAND_PRIMARY,
+            "secondary": settings.APP_BRAND_SECONDARY,
+            "accent": settings.APP_BRAND_ACCENT,
+            "info": settings.APP_BRAND_INFO,
+            "logo_path": settings.APP_BRAND_LOGO,
+            "favicon_path": settings.APP_BRAND_FAVICON,
+            "capsule_enabled": settings.APP_BRAND_CAPSULE_ENABLED,
+        }
+    }

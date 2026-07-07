@@ -7,6 +7,19 @@ PROJECT_ROOT = BASE_DIR.parent
 
 APP_NAME = config("APP_NAME", default="emisiones")
 APP_ENV = config("APP_ENV", default="local")
+
+# Branding / company presentation
+APP_COMPANY_NAME = config("APP_COMPANY_NAME", default="Laboratorios Oftalmi")
+APP_COMPANY_SHORT_NAME = config("APP_COMPANY_SHORT_NAME", default="Oftalmi")
+APP_PRODUCT_NAME = config("APP_PRODUCT_NAME", default="Sistema de Rutas de Pago")
+APP_PRODUCT_SHORT_NAME = config("APP_PRODUCT_SHORT_NAME", default="Rutas de Pago")
+APP_BRAND_PRIMARY = config("APP_BRAND_PRIMARY", default="#1226AA")
+APP_BRAND_SECONDARY = config("APP_BRAND_SECONDARY", default="#8A1A9B")
+APP_BRAND_ACCENT = config("APP_BRAND_ACCENT", default="#FFE800")
+APP_BRAND_INFO = config("APP_BRAND_INFO", default="#6FCFEB")
+APP_BRAND_LOGO = config("APP_BRAND_LOGO", default="img/oftalmi-icon.png")
+APP_BRAND_FAVICON = config("APP_BRAND_FAVICON", default="img/favicon.ico")
+APP_BRAND_CAPSULE_ENABLED = config("APP_BRAND_CAPSULE_ENABLED", default=True, cast=bool)
 SECRET_KEY = config("SECRET_KEY", default="unsafe-dev-secret-key-change-me")
 DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
@@ -30,6 +43,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -52,6 +66,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "apps.accounts.context_processors.role_navigation",
+                "apps.accounts.context_processors.app_branding",
             ],
         },
     },
@@ -83,6 +98,17 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+WHITENOISE_KEEP_ONLY_HASHED_FILES = True
+
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
