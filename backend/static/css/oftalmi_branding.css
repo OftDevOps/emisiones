@@ -534,3 +534,539 @@ dd {
   white-space: nowrap !important;
   border: 0 !important;
 }
+
+/* F2-PILOT-BR03: brand contrast polish */
+:root {
+  --oftalmi-primary: #1226AA;
+  --oftalmi-secondary: #8A1A9B;
+  --oftalmi-accent: #FFE800;
+  --oftalmi-info: #6FCFEB;
+  --oftalmi-surface: #FFFFFF;
+  --oftalmi-surface-soft: #F7F8FF;
+  --oftalmi-text-strong: #111827;
+  --oftalmi-text-muted: #4B5563;
+  --oftalmi-border: rgba(18, 38, 170, 0.18);
+  --oftalmi-shadow: 0 12px 32px rgba(18, 38, 170, 0.14);
+}
+
+body {
+  color: var(--oftalmi-text-strong);
+  background:
+    radial-gradient(circle at top left, rgba(111, 207, 235, 0.20), transparent 32rem),
+    linear-gradient(135deg, #F8FAFF 0%, #FFFFFF 46%, #F9F5FF 100%);
+}
+
+a,
+.nav-link {
+  color: var(--oftalmi-primary);
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: var(--oftalmi-secondary);
+  background: rgba(18, 38, 170, 0.08);
+}
+
+.oftalmi-header,
+.app-header,
+.site-header {
+  border-bottom: 1px solid var(--oftalmi-border);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 24px rgba(18, 38, 170, 0.08);
+}
+
+.card,
+.panel,
+.dashboard-card,
+.quick-action-card,
+.summary-card,
+.login-card,
+.oftalmi-card {
+  background: var(--oftalmi-surface);
+  border: 1px solid var(--oftalmi-border);
+  box-shadow: var(--oftalmi-shadow);
+}
+
+.button,
+.btn,
+button[type="submit"],
+a.button,
+.nav-link-primary {
+  border: 1px solid var(--oftalmi-primary);
+  background: var(--oftalmi-primary);
+  color: #FFFFFF !important;
+  box-shadow: 0 8px 18px rgba(18, 38, 170, 0.22);
+}
+
+.button:hover,
+.button:focus,
+.btn:hover,
+.btn:focus,
+button[type="submit"]:hover,
+button[type="submit"]:focus,
+a.button:hover,
+a.button:focus,
+.nav-link-primary:hover,
+.nav-link-primary:focus {
+  border-color: var(--oftalmi-secondary);
+  background: var(--oftalmi-secondary);
+  color: #FFFFFF !important;
+}
+
+.button-secondary,
+.btn-secondary,
+a.button-secondary {
+  border: 1px solid var(--oftalmi-primary);
+  background: #FFFFFF;
+  color: var(--oftalmi-primary) !important;
+}
+
+.button-secondary:hover,
+.button-secondary:focus,
+.btn-secondary:hover,
+.btn-secondary:focus,
+a.button-secondary:hover,
+a.button-secondary:focus {
+  background: rgba(18, 38, 170, 0.08);
+  color: var(--oftalmi-secondary) !important;
+}
+
+.badge,
+.status-badge,
+.role-badge {
+  border: 1px solid rgba(18, 38, 170, 0.18);
+  background: rgba(111, 207, 235, 0.18);
+  color: var(--oftalmi-primary);
+}
+
+.alert,
+.message,
+.empty-state {
+  border-left: 4px solid var(--oftalmi-primary);
+  background: var(--oftalmi-surface-soft);
+  color: var(--oftalmi-text-strong);
+}
+
+table thead th {
+  background: rgba(18, 38, 170, 0.08);
+  color: var(--oftalmi-primary);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--oftalmi-primary);
+  box-shadow: 0 0 0 3px rgba(18, 38, 170, 0.14);
+  outline: none;
+}
+
+
+/* F2-PILOT-BR03B: header contrast and account actions */
+.oftalmi-header,
+.app-header,
+.site-header,
+.main-header {
+  background: linear-gradient(135deg, var(--brand-primary, #1226AA), var(--brand-secondary, #8A1A9B));
+  color: #ffffff;
+  border-bottom: 4px solid var(--brand-accent, #FFE800);
+}
+
+.oftalmi-header a,
+.app-header a,
+.site-header a,
+.main-header a {
+  color: #ffffff;
+}
+
+.oftalmi-brand,
+.brand,
+.brand-block,
+.brand-identity,
+.app-brand,
+.header-brand {
+  color: #ffffff;
+}
+
+.oftalmi-brand *,
+.brand *,
+.brand-block *,
+.brand-identity *,
+.app-brand *,
+.header-brand * {
+  color: inherit;
+}
+
+.oftalmi-brand-title,
+.brand-title,
+.app-title,
+.product-name,
+.site-title {
+  color: #ffffff;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.oftalmi-brand-subtitle,
+.brand-subtitle,
+.company-name,
+.company-short-name,
+.site-subtitle {
+  color: #f7fbff;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.header-user,
+.user-menu,
+.account-menu,
+.user-session,
+.auth-actions,
+.session-actions,
+.oftalmi-user {
+  color: #ffffff;
+}
+
+.header-user *,
+.user-menu *,
+.account-menu *,
+.user-session *,
+.auth-actions *,
+.session-actions *,
+.oftalmi-user * {
+  color: inherit;
+}
+
+.header-user .user-email,
+.user-menu .user-email,
+.account-menu .user-email,
+.user-session .user-email,
+.oftalmi-user .user-email,
+.header-user small,
+.user-menu small,
+.account-menu small,
+.user-session small,
+.oftalmi-user small {
+  color: #eef7ff;
+  font-weight: 600;
+}
+
+.oftalmi-header form,
+.app-header form,
+.site-header form,
+.main-header form,
+.auth-actions form,
+.session-actions form,
+.user-session form,
+.account-menu form {
+  margin: 0;
+}
+
+.oftalmi-header button,
+.app-header button,
+.site-header button,
+.main-header button,
+.auth-actions button,
+.session-actions button,
+.user-session button,
+.account-menu button,
+.logout-button,
+button.logout-button {
+  background: var(--brand-accent, #FFE800);
+  color: #1f1f2f;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  font-weight: 800;
+}
+
+.oftalmi-header button:hover,
+.app-header button:hover,
+.site-header button:hover,
+.main-header button:hover,
+.auth-actions button:hover,
+.session-actions button:hover,
+.user-session button:hover,
+.account-menu button:hover,
+.logout-button:hover,
+button.logout-button:hover,
+.oftalmi-header button:focus,
+.app-header button:focus,
+.site-header button:focus,
+.main-header button:focus,
+.auth-actions button:focus,
+.session-actions button:focus,
+.user-session button:focus,
+.account-menu button:focus,
+.logout-button:focus,
+button.logout-button:focus {
+  background: #fff27a;
+  color: #111827;
+  border-color: #ffffff;
+  outline: 3px solid var(--brand-info, #6FCFEB);
+  outline-offset: 2px;
+}
+
+/* F2-PILOT-BR03B: header contrast polish */
+.oftalmi-header,
+.app-header,
+.site-header,
+header.oftalmi-header {
+  background: linear-gradient(135deg, var(--brand-primary, #1226AA) 0%, var(--brand-secondary, #8A1A9B) 100%) !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255, 232, 0, 0.28) !important;
+  box-shadow: 0 16px 38px rgba(18, 38, 170, 0.22) !important;
+}
+
+.oftalmi-header a,
+.app-header a,
+.site-header a,
+.oftalmi-header .brand-title,
+.oftalmi-header .brand-subtitle,
+.oftalmi-header .brand-name,
+.oftalmi-header .brand-product,
+.oftalmi-header .brand-company,
+.oftalmi-header .app-brand-title,
+.oftalmi-header .app-brand-subtitle,
+.oftalmi-header .product-name,
+.oftalmi-header .company-name,
+.oftalmi-header .user-email,
+.oftalmi-header .session-email,
+.oftalmi-header .current-user,
+.oftalmi-header .user-info,
+.app-header .brand-title,
+.app-header .brand-subtitle,
+.app-header .user-email,
+.site-header .brand-title,
+.site-header .brand-subtitle,
+.site-header .user-email {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28) !important;
+}
+
+.oftalmi-header .brand-subtitle,
+.oftalmi-header .app-brand-subtitle,
+.oftalmi-header .company-name,
+.app-header .brand-subtitle,
+.site-header .brand-subtitle {
+  color: rgba(255, 255, 255, 0.88) !important;
+  font-weight: 600 !important;
+}
+
+.oftalmi-header .brand-title,
+.oftalmi-header .app-brand-title,
+.oftalmi-header .product-name,
+.app-header .brand-title,
+.site-header .brand-title {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.oftalmi-header .brand-logo,
+.oftalmi-header .app-logo,
+.oftalmi-header img,
+.app-header .brand-logo,
+.site-header .brand-logo {
+  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18) !important;
+}
+
+.oftalmi-header .session-area,
+.oftalmi-header .user-session,
+.oftalmi-header .auth-area,
+.oftalmi-header .header-actions,
+.app-header .session-area,
+.site-header .session-area {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+}
+
+.oftalmi-header .user-email,
+.oftalmi-header .session-email,
+.oftalmi-header .current-user,
+.oftalmi-header .user-info,
+.app-header .user-email,
+.site-header .user-email {
+  max-width: 28rem !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-weight: 700 !important;
+}
+
+.oftalmi-header .logout-button,
+.oftalmi-header .logout-link,
+.oftalmi-header form button,
+.oftalmi-header button[type="submit"],
+.app-header .logout-button,
+.site-header .logout-button {
+  background: var(--brand-accent, #FFE800) !important;
+  color: var(--brand-primary, #1226AA) !important;
+  border: 1px solid rgba(255, 255, 255, 0.86) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.20) !important;
+  font-weight: 800 !important;
+  text-shadow: none !important;
+}
+
+.oftalmi-header .logout-button:hover,
+.oftalmi-header .logout-link:hover,
+.oftalmi-header form button:hover,
+.oftalmi-header button[type="submit"]:hover,
+.app-header .logout-button:hover,
+.site-header .logout-button:hover {
+  background: #ffffff !important;
+  color: var(--brand-secondary, #8A1A9B) !important;
+  transform: translateY(-1px) !important;
+}
+
+.oftalmi-card,
+.dashboard-card,
+.summary-card,
+.card {
+  overflow: hidden;
+}
+
+.oftalmi-card .card-value,
+.dashboard-card .card-value,
+.summary-card .card-value,
+.card .card-value {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* F2-PILOT-BR03C: header readability dark text polish */
+:root {
+  --oftalmi-header-text: #1226AA;
+  --oftalmi-header-muted: #334155;
+  --oftalmi-header-surface: rgba(255, 255, 255, 0.88);
+}
+
+.oftalmi-header,
+.app-header,
+.site-header,
+.main-header {
+  background:
+    linear-gradient(90deg, rgba(111, 207, 235, 0.24) 0%, rgba(255, 255, 255, 0.92) 44%, rgba(138, 26, 155, 0.16) 100%) !important;
+  color: var(--oftalmi-header-text) !important;
+  border-bottom: 1px solid rgba(18, 38, 170, 0.12) !important;
+}
+
+.oftalmi-brand,
+.brand,
+.brand-block,
+.header-brand,
+.app-brand {
+  color: var(--oftalmi-header-text) !important;
+}
+
+.oftalmi-brand *,
+.brand *,
+.brand-block *,
+.header-brand *,
+.app-brand * {
+  color: inherit !important;
+  text-shadow: none !important;
+}
+
+.oftalmi-brand-title,
+.brand-title,
+.app-brand-title,
+.header-brand-title,
+.oftalmi-brand strong,
+.brand strong {
+  color: #1226AA !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.01em !important;
+}
+
+.oftalmi-brand-subtitle,
+.brand-subtitle,
+.app-brand-subtitle,
+.header-brand-subtitle,
+.oftalmi-brand small,
+.brand small {
+  color: #475569 !important;
+  font-weight: 600 !important;
+}
+
+.oftalmi-userbar,
+.userbar,
+.user-menu,
+.header-user,
+.session-user,
+.auth-user,
+.oftalmi-header .user-email,
+.oftalmi-header [class*="email"] {
+  color: #334155 !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+.oftalmi-header a,
+.app-header a,
+.site-header a,
+.main-header a {
+  color: #1226AA !important;
+}
+
+.oftalmi-header .logout-button,
+.oftalmi-header button[type="submit"],
+.app-header .logout-button,
+.app-header button[type="submit"],
+.site-header .logout-button,
+.site-header button[type="submit"],
+.main-header .logout-button,
+.main-header button[type="submit"] {
+  background: #1226AA !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(18, 38, 170, 0.88) !important;
+  box-shadow: 0 10px 22px rgba(18, 38, 170, 0.22) !important;
+  margin-left: 1rem !important;
+}
+
+.oftalmi-header .logout-button:hover,
+.oftalmi-header button[type="submit"]:hover,
+.app-header .logout-button:hover,
+.app-header button[type="submit"]:hover,
+.site-header .logout-button:hover,
+.site-header button[type="submit"]:hover,
+.main-header .logout-button:hover,
+.main-header button[type="submit"]:hover {
+  background: #8A1A9B !important;
+  color: #FFFFFF !important;
+  border-color: #8A1A9B !important;
+}
+
+.oftalmi-header .brand-logo,
+.oftalmi-brand img,
+.app-brand img,
+.header-brand img,
+.brand img {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(18, 38, 170, 0.10) !important;
+  box-shadow: 0 8px 18px rgba(18, 38, 170, 0.14) !important;
+}
+
+.dashboard-card,
+.summary-card,
+.metric-card,
+.panel-card {
+  overflow: hidden !important;
+}
+
+.dashboard-card .value,
+.summary-card .value,
+.metric-card .value,
+.panel-card .value,
+.dashboard-card p,
+.summary-card p,
+.metric-card p,
+.panel-card p {
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+}
