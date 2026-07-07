@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Solicitudes de pago{% endblock %}
+{% block title %}Emisiones{% endblock %}
 
 {% block content %}
 <p><a href="{% url 'payment_requests:dashboard' %}">Dashboard operativo</a></p>
 
-<h1>Solicitudes de pago</h1>
+<h1>Emisiones</h1>
 
 <p>
-    <a href="{% url 'payment_requests:create' %}">Nueva solicitud</a>
+    <a href="{% url 'payment_requests:create' %}">Nueva emisión</a>
 </p>
 
 {% if payment_requests %}
@@ -43,6 +43,6 @@
     </tbody>
 </table>
 {% else %}
-<p>No hay solicitudes de pago registradas.</p>
+<p>No hay emisiones registradas.</p>
 {% endif %}
 {% endblock %}

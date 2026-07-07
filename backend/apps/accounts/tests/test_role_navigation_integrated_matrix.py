@@ -17,9 +17,9 @@ from apps.accounts.role_permissions import (
 
 
 NAVIGATION_CASES = (
-    ("Solicitudes", "payment_requests:dashboard", PERM_VIEW_PAYMENT_REQUEST_DASHBOARD),
+    ("Emisiones", "payment_requests:dashboard", PERM_VIEW_PAYMENT_REQUEST_DASHBOARD),
     ("Listado", "payment_requests:list", PERM_VIEW_PAYMENT_REQUESTS),
-    ("Nueva solicitud", "payment_requests:create", PERM_CREATE_PAYMENT_REQUEST),
+    ("Nueva emisión", "payment_requests:create", PERM_CREATE_PAYMENT_REQUEST),
     ("Aprobaciones", "payment_approvals:pending", PERM_VIEW_PENDING_APPROVALS),
     ("Cuentas por pagar", "payment_requests:accounts_payable", PERM_VIEW_ACCOUNTS_PAYABLE),
     ("Auditoria", "payment_approvals:audit", PERM_VIEW_AUDIT_WORKBENCH),

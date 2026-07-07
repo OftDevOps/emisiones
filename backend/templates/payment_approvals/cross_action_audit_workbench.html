@@ -6,7 +6,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
     <h1 class="h3 mb-1">Auditoría de acciones críticas</h1>
-    <p class="text-muted mb-0">Trazabilidad transversal de solicitudes de pago.</p>
+    <p class="text-muted mb-0">Trazabilidad transversal de emisiones.</p>
   </div>
   <a class="btn btn-outline-secondary" href="{% url 'payment_approvals:pending' %}">Pendientes por aprobar</a>
 </div>
@@ -45,8 +45,8 @@
         <input class="form-control" type="search" id="id_user" name="user" value="{{ filters.user }}" placeholder="correo usuario">
       </div>
       <div class="col-md-3">
-        <label class="form-label" for="id_request">Solicitud</label>
-        <input class="form-control" type="search" id="id_request" name="request" value="{{ filters.request }}" placeholder="concepto solicitud">
+        <label class="form-label" for="id_request">Emisión</label>
+        <input class="form-control" type="search" id="id_request" name="request" value="{{ filters.request }}" placeholder="concepto emisión">
       </div>
       <div class="col-md-3 d-flex gap-2">
         <button class="btn btn-primary" type="submit">Filtrar</button>
@@ -120,7 +120,7 @@
       <thead>
         <tr>
           <th>Fecha</th>
-          <th>Solicitud</th>
+          <th>Emisión</th>
           <th>Concepto</th>
           <th>Empresa</th>
           <th>Acción</th>

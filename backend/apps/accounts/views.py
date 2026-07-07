@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
-    """Vista inicial autenticada del Sistema de Rutas de Pago."""
+    """Vista inicial autenticada del Sistema de Rutas de Emisión."""
 
     template_name = "accounts/dashboard.html"
 

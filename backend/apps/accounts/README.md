@@ -1,6 +1,6 @@
 # Accounts
 
-App responsable de la identidad interna del Sistema de Rutas de Pago Oftalmi.
+App responsable de la identidad interna del Sistema de Rutas de Emisión Oftalmi.
 
 ## Decisiones
 

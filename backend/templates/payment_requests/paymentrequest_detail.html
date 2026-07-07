@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Solicitud de pago #{{ payment_request.id }}
+{% block title %}Emisión #{{ payment_request.id }}
 <section>
   <h2>Ejecución de pago</h2>
 
@@ -39,7 +39,7 @@
     {% if can_execute_payment %}
       <p>
         <a href="{% url 'payment_requests:execute_payment' payment_request.pk %}">
-          Registrar pago
+          Registrar pago en ERP
         </a>
       </p>
     {% endif %}
@@ -49,7 +49,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>Solicitud de pago #{{ payment_request.id }}</h1>
+<h1>Emisión #{{ payment_request.id }}</h1>
 
 <dl>
     <dt>Empresa</dt>
@@ -88,7 +88,7 @@
 
     <form method="post" action="{% url 'payment_requests:cancel' payment_request.pk %}">
         {% csrf_token %}
-        <button type="submit">Cancelar solicitud</button>
+        <button type="submit">Cancelar emisión</button>
     </form>
 </section>
 {% endif %}
@@ -135,7 +135,7 @@
         </tbody>
     </table>
     {% else %}
-    <p>La solicitud todavía no tiene ruta de aprobación generada.</p>
+    <p>La emisión todavía no tiene ruta de aprobación generada.</p>
     {% endif %}
 </section>
 

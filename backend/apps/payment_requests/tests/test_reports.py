@@ -72,7 +72,7 @@ class PaymentRequestReportViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "payment_requests/paymentrequest_report.html")
-        self.assertContains(response, "Reporte operativo de solicitudes")
+        self.assertContains(response, "Reporte operativo de emisiones")
 
     def test_solicitante_cannot_access_report(self):
         self.client.force_login(self.requester)

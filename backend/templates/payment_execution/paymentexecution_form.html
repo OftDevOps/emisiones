@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Registrar ejecucion de pago</h1>
+<h1>Registrar ejecución de pago en ERP</h1>
 
 <section>
-  <h2>Solicitud #{{ payment_request.id }}</h2>
+  <h2>Emisión #{{ payment_request.id }}</h2>
   <p><strong>Empresa:</strong> {{ payment_request.company }}</p>
   <p><strong>Beneficiario:</strong> {{ payment_request.beneficiary }}</p>
   <p><strong>Concepto:</strong> {{ payment_request.concept }}</p>
@@ -14,7 +14,7 @@
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button type="submit">Registrar pago</button>
+  <button type="submit">Registrar pago en ERP</button>
 </form>
 
 <p><a href="{% url 'payment_requests:accounts_payable' %}">Volver a Cuentas por Pagar</a></p>

@@ -253,5 +253,5 @@ class PendingApprovalStepsViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(list(response.context["pending_steps"]), [])
-        self.assertContains(response, "No tienes solicitudes pendientes por aprobar.")
+        self.assertContains(response, "No tienes emisiones pendientes por aprobar.")
         self.assertNotContains(response, "No visible sin empresa")

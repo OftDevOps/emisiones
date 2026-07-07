@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Reporte operativo de solicitudes{% endblock %}
+{% block title %}Reporte operativo de emisiones{% endblock %}
 
 {% block content %}
 <section class="card">
   <div class="card-body">
-    <h1>Reporte operativo de solicitudes</h1>
+    <h1>Reporte operativo de emisiones</h1>
     <p>Consulta basica por estado, empresa y fecha de vencimiento.</p>
 
     <form method="get" class="row g-3 mb-4">
@@ -51,7 +51,7 @@
     <div class="row mb-4">
       <div class="col-md-6">
         <div class="border rounded p-3">
-          <strong>Total solicitudes</strong>
+          <strong>Total emisiones</strong>
           <div>{{ total_requests }}</div>
         </div>
       </div>
@@ -82,7 +82,7 @@
             <td>{{ row.amount }}</td>
           </tr>
         {% empty %}
-          <tr><td colspan="4">Sin solicitudes para los filtros seleccionados.</td></tr>
+          <tr><td colspan="4">Sin emisiones para los filtros seleccionados.</td></tr>
         {% endfor %}
       </tbody>
     </table>

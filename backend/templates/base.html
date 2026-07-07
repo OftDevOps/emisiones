@@ -42,13 +42,13 @@
 {% if request.user.is_authenticated %}
 <nav class="oftalmi-nav" aria-label="Navegación principal">
     {% if role_nav.can_view_payment_dashboard %}
-        <a class="nav-link" href="{% url 'payment_requests:dashboard' %}">Solicitudes</a>
+        <a class="nav-link" href="{% url 'payment_requests:dashboard' %}">Emisiones</a>
     {% endif %}
     {% if role_nav.can_view_payment_requests %}
         <a class="nav-link" href="{% url 'payment_requests:list' %}">Listado</a>
     {% endif %}
     {% if role_nav.can_create_payment_request %}
-        <a class="nav-link nav-link-primary" href="{% url 'payment_requests:create' %}">Nueva solicitud</a>
+        <a class="nav-link nav-link-primary" href="{% url 'payment_requests:create' %}">Nueva emisión</a>
     {% endif %}
     {% if role_nav.can_view_pending_approvals %}
         <a class="nav-link" href="{% url 'payment_approvals:pending' %}">Aprobaciones</a>

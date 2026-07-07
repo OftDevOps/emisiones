@@ -6,7 +6,7 @@
 <section class="oftalmi-page-header dashboard-header">
   <div>
     <p class="eyebrow">Operación controlada</p>
-    <h1>Dashboard operativo de solicitudes</h1>
+    <h1>Dashboard operativo de emisiones</h1>
     <p>Indicadores, pendientes y accesos rápidos según rol y alcance operativo.</p>
   </div>
   <div class="dashboard-profile">
@@ -37,7 +37,7 @@
 
 <section class="kpi-grid">
   <article class="card oftalmi-kpi">
-    <span class="kpi-label">Total de solicitudes</span>
+    <span class="kpi-label">Total de emisiones</span>
     <strong class="kpi-value">{{ total_requests }}</strong>
   </article>
   {% for card in status_cards %}
@@ -52,8 +52,8 @@
 <section class="card section-card">
   <div class="section-card-header">
     <div>
-      <h2>Solicitudes aprobadas pendientes de pago</h2>
-      <p>Total pendiente de pago: <strong>{{ pending_payment_count }}</strong></p>
+      <h2>Emisiones aprobadas pendientes de ejecución</h2>
+      <p>Total pendiente de ejecución: <strong>{{ pending_payment_count }}</strong></p>
     </div>
   </div>
 
@@ -78,14 +78,14 @@
               <td>{{ payment_request.beneficiary }}</td>
               <td>{{ payment_request.amount }} {{ payment_request.currency }}</td>
               <td>{{ payment_request.due_date|default:"Sin fecha" }}</td>
-              <td><a href="{% url 'payment_requests:detail' payment_request.pk %}">Ver solicitud</a></td>
+              <td><a href="{% url 'payment_requests:detail' payment_request.pk %}">Ver emisión</a></td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   {% else %}
-    <p class="empty-state">No hay solicitudes aprobadas pendientes de pago.</p>
+    <p class="empty-state">No hay emisiones aprobadas pendientes de ejecución.</p>
   {% endif %}
 </section>
 {% endif %}
@@ -112,7 +112,7 @@
       <table>
         <thead>
           <tr>
-            <th>Solicitud</th>
+            <th>Emisión</th>
             <th>Empresa</th>
             <th>Beneficiario</th>
             <th>Monto</th>
@@ -128,7 +128,7 @@
               <td>{{ step.payment_request.beneficiary }}</td>
               <td>{{ step.payment_request.amount }} {{ step.payment_request.currency }}</td>
               <td>{{ step.sequence }}</td>
-              <td><a href="{% url 'payment_requests:detail' step.payment_request.pk %}">Ver solicitud</a></td>
+              <td><a href="{% url 'payment_requests:detail' step.payment_request.pk %}">Ver emisión</a></td>
             </tr>
           {% endfor %}
         </tbody>
@@ -141,7 +141,7 @@
 
 <section class="card section-card">
   <div class="section-card-header">
-    <h2>Últimas solicitudes</h2>
+    <h2>Últimas emisiones</h2>
   </div>
 
   {% if latest_requests %}
@@ -174,7 +174,7 @@
       </table>
     </div>
   {% else %}
-    <p class="empty-state">No hay solicitudes registradas.</p>
+    <p class="empty-state">No hay emisiones registradas.</p>
   {% endif %}
 </section>
 {% endblock %}

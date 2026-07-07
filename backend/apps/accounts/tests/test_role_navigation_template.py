@@ -24,7 +24,7 @@ class RoleBasedNavigationTemplateTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         content = response.content.decode("utf-8")
-        self.assertIn("Solicitudes", content)
+        self.assertIn("Emisiones", content)
         self.assertNotIn("Cuentas por pagar", content)
         self.assertNotIn("Auditoria", content)
 

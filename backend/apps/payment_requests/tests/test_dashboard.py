@@ -290,7 +290,7 @@ class PaymentRequestDashboardViewTests(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Solicitudes aprobadas pendientes de pago")
-        self.assertContains(response, "Total pendiente de pago:")
+        self.assertContains(response, "Emisiones aprobadas pendientes de ejecución")
+        self.assertContains(response, "Total pendiente de ejecución:")
         self.assertContains(response, "Pago aprobado pendiente")
 

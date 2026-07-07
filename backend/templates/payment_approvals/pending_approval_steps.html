@@ -11,13 +11,13 @@
   <table>
     <thead>
       <tr>
-        <th>Solicitud</th>
+        <th>Emisión</th>
         <th>Empresa</th>
         <th>Beneficiario</th>
         <th>Concepto</th>
         <th>Solicitante</th>
         <th>Monto</th>
-        <th>Estado solicitud</th>
+        <th>Estado emisión</th>
         <th>Paso</th>
         <th>Rol requerido</th>
         <th>Creada</th>
@@ -39,7 +39,7 @@
           <td>{{ step.payment_request.created_at }}</td>
           <td>
             <a href="{% url 'payment_requests:detail' step.payment_request.pk %}">
-              Ver solicitud
+              Ver emisión
             </a>
           </td>
         </tr>
@@ -47,7 +47,7 @@
     </tbody>
   </table>
 {% else %}
-  <p>No tienes solicitudes pendientes por aprobar.</p>
+  <p>No tienes emisiones pendientes por aprobar.</p>
 {% endif %}
 
 <p>

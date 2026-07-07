@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Nueva solicitud de pago{% endblock %}
+{% block title %}Nueva emisión{% endblock %}
 
 {% block content %}
-<h1>Nueva solicitud de pago</h1>
+<h1>Nueva emisión</h1>
 
 <form method="post">
     {% csrf_token %}
@@ -51,7 +51,7 @@
         {{ form.due_date.errors }}
     </p>
 
-    <button type="submit">Crear solicitud</button>
+    <button type="submit">Crear emisión</button>
 </form>
 
 <p>
