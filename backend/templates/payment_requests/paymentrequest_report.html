@@ -40,6 +40,14 @@
       </div>
     </form>
 
+    <form method="get" action="{% url 'payment_requests:report_export' %}" class="mb-4">
+      <input type="hidden" name="status" value="{{ filter_status }}">
+      <input type="hidden" name="company" value="{{ filter_company }}">
+      <input type="hidden" name="date_from" value="{{ filter_date_from }}">
+      <input type="hidden" name="date_to" value="{{ filter_date_to }}">
+      <button type="submit" class="btn btn-secondary">Exportar CSV</button>
+    </form>
+
     <div class="row mb-4">
       <div class="col-md-6">
         <div class="border rounded p-3">

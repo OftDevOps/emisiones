@@ -1,3 +1,5 @@
+import csv
+
 from apps.accounts.role_permissions import (
     PERM_VIEW_AUDIT_WORKBENCH,
     PERM_VIEW_ACCOUNTS_PAYABLE,
@@ -9,6 +11,7 @@ from apps.accounts.role_permissions import (
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.dateparse import parse_date
@@ -45,6 +48,30 @@ def scoped_payment_request_queryset(user):
         return queryset.filter(company_id=user.primary_company_id)
 
     return queryset.none()
+
+
+def get_payment_request_report_queryset(request):
+    """Return report queryset using the same filters for screen and exports."""
+    queryset = scoped_payment_request_queryset(request.user)
+    status = request.GET.get("status", "").strip()
+    company_id = request.GET.get("company", "").strip()
+    date_from = parse_date(request.GET.get("date_from", ""))
+    date_to = parse_date(request.GET.get("date_to", ""))
+
+    valid_statuses = {choice[0] for choice in PaymentRequestStatus.choices}
+    if status in valid_statuses:
+        queryset = queryset.filter(status=status)
+
+    if company_id:
+        queryset = queryset.filter(company_id=company_id)
+
+    if date_from:
+        queryset = queryset.filter(due_date__gte=date_from)
+
+    if date_to:
+        queryset = queryset.filter(due_date__lte=date_to)
+
+    return queryset.order_by("company__name", "status", "due_date", "-created_at")
 
 
 class PaymentRequestListView(LoginRequiredMixin, ListView):
@@ -156,26 +183,7 @@ class PaymentRequestReportView(LoginRequiredMixin, TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_filtered_queryset(self):
-        queryset = scoped_payment_request_queryset(self.request.user)
-        status = self.request.GET.get("status", "").strip()
-        company_id = self.request.GET.get("company", "").strip()
-        date_from = parse_date(self.request.GET.get("date_from", ""))
-        date_to = parse_date(self.request.GET.get("date_to", ""))
-
-        valid_statuses = {choice[0] for choice in PaymentRequestStatus.choices}
-        if status in valid_statuses:
-            queryset = queryset.filter(status=status)
-
-        if company_id:
-            queryset = queryset.filter(company_id=company_id)
-
-        if date_from:
-            queryset = queryset.filter(due_date__gte=date_from)
-
-        if date_to:
-            queryset = queryset.filter(due_date__lte=date_to)
-
-        return queryset.order_by("company__name", "status", "due_date", "-created_at")
+        return get_payment_request_report_queryset(self.request)
 
     def get_available_companies(self):
         user = self.request.user
@@ -215,6 +223,50 @@ class PaymentRequestReportView(LoginRequiredMixin, TemplateView):
             }
         )
         return context
+
+
+class PaymentRequestReportExportView(LoginRequiredMixin, View):
+    """CSV export for the basic operational payment request report."""
+
+    def dispatch(self, request, *args, **kwargs):
+        _require_operational_permission(
+            request.user,
+            PERM_VIEW_PAYMENT_REQUEST_REPORT,
+            "Su rol no permite exportar el reporte operativo de solicitudes.",
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        queryset = get_payment_request_report_queryset(request)
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = 'attachment; filename="payment_requests_report.csv"'
+        response.write("\ufeff")
+
+        writer = csv.writer(response)
+        writer.writerow([
+            "Empresa",
+            "Beneficiario",
+            "Concepto",
+            "Estado",
+            "Fecha vencimiento",
+            "Monto",
+            "Moneda",
+            "Solicitado por",
+        ])
+
+        for payment_request in queryset:
+            writer.writerow([
+                payment_request.company.name,
+                str(payment_request.beneficiary),
+                payment_request.concept,
+                payment_request.get_status_display(),
+                payment_request.due_date.isoformat() if payment_request.due_date else "",
+                payment_request.amount,
+                payment_request.currency,
+                payment_request.requested_by.email if payment_request.requested_by else "",
+            ])
+
+        return response
 
 
 class PaymentRequestDashboardView(LoginRequiredMixin, TemplateView):

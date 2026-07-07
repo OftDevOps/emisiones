@@ -147,3 +147,68 @@ class PaymentRequestReportViewTests(TestCase):
         self.assertContains(response, "Aprobada dentro del rango")
         self.assertNotContains(response, "Rechazada fuera del filtro")
         self.assertNotContains(response, "Aprobada fuera de fecha")
+
+    def test_report_export_requires_login(self):
+        response = self.client.get(reverse("payment_requests:report_export"))
+
+        self.assertEqual(response.status_code, 302)
+
+    def test_solicitante_cannot_export_report(self):
+        self.client.force_login(self.requester)
+
+        response = self.client.get(reverse("payment_requests:report_export"))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_finance_user_can_export_filtered_report_as_csv(self):
+        self.client.force_login(self.finance_user)
+        self.create_payment_request(
+            self.company,
+            self.beneficiary,
+            self.finance_user,
+            PaymentRequestStatus.APPROVED,
+            "Exportable dentro del rango",
+            date(2026, 7, 15),
+        )
+        self.create_payment_request(
+            self.company,
+            self.beneficiary,
+            self.finance_user,
+            PaymentRequestStatus.REJECTED,
+            "No exportable por estado",
+            date(2026, 7, 15),
+        )
+        self.create_payment_request(
+            self.other_company,
+            self.other_beneficiary,
+            self.other_user,
+            PaymentRequestStatus.APPROVED,
+            "No exportable por empresa",
+            date(2026, 7, 15),
+        )
+
+        response = self.client.get(
+            reverse("payment_requests:report_export"),
+            {
+                "status": PaymentRequestStatus.APPROVED,
+                "date_from": "2026-07-01",
+                "date_to": "2026-07-31",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
+        self.assertIn("attachment;", response["Content-Disposition"])
+        content = response.content.decode("utf-8-sig")
+        self.assertIn("Empresa,Beneficiario,Concepto,Estado", content)
+        self.assertIn("Exportable dentro del rango", content)
+        self.assertNotIn("No exportable por estado", content)
+        self.assertNotIn("No exportable por empresa", content)
+
+    def test_report_screen_exposes_export_action(self):
+        self.client.force_login(self.finance_user)
+
+        response = self.client.get(self.url)
+
+        self.assertContains(response, "Exportar CSV")
+        self.assertContains(response, reverse("payment_requests:report_export"))
