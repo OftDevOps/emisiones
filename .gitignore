@@ -54,3 +54,4 @@ logs/
 *.key
 *.crt
 secrets/
+backups/*.sha256
