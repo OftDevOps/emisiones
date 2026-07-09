@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from .services import calculate_item_totals, calculate_payment_request_totals
 
 
 
@@ -207,19 +208,17 @@ class PaymentRequest(models.Model):
             return
 
         items = PaymentRequestItem.objects.filter(payment_request_id=self.pk)
-        subtotal = quantize_money(sum((item.subtotal_amount for item in items), Decimal("0.00")))
-        tax_total = quantize_money(sum((item.tax_amount for item in items), Decimal("0.00")))
-        total = quantize_money(subtotal + tax_total)
+        totals = calculate_payment_request_totals(items)
 
-        self.subtotal_amount = subtotal
-        self.tax_amount = tax_total
-        self.amount = total
+        self.subtotal_amount = totals["subtotal_amount"]
+        self.tax_amount = totals["tax_amount"]
+        self.amount = totals["amount"]
 
         if save:
             PaymentRequest.objects.filter(pk=self.pk).update(
-                subtotal_amount=subtotal,
-                tax_amount=tax_total,
-                amount=total,
+                subtotal_amount=self.subtotal_amount,
+                tax_amount=self.tax_amount,
+                amount=self.amount,
                 updated_at=timezone.now(),
             )
 
@@ -292,7 +291,18 @@ class PaymentRequestItem(models.Model):
         return self
 
     def save(self, *args, **kwargs):
-        self.recalculate_amounts()
+        if self.tax_percentage_snapshot is None and self.tax_rate_id:
+            self.tax_percentage_snapshot = self.tax_rate.percentage
+
+        totals = calculate_item_totals(
+            quantity=self.quantity,
+            unit_price=self.unit_price,
+            tax_percentage_snapshot=self.tax_percentage_snapshot,
+        )
+        self.subtotal_amount = totals["subtotal_amount"]
+        self.tax_amount = totals["tax_amount"]
+        self.total_amount = totals["total_amount"]
+
         self.full_clean()
         super().save(*args, **kwargs)
         self.payment_request.recalculate_totals_from_items(save=True)
