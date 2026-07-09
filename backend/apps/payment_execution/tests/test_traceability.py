@@ -115,9 +115,9 @@ class PaymentExecutionTraceabilityTests(TestCase):
         self.assertContains(response, "250.00")
         self.assertContains(response, "Pago confirmado por banco.")
         self.assertContains(response, self.cxp_user.email)
-        self.assertNotContains(response, "Registrar pago")
+        self.assertNotContains(response, "Marcar emisión como pagada")
 
-    def test_detail_shows_register_payment_link_for_approved_request_and_cxp_user(self):
+    def test_detail_shows_mark_paid_link_for_approved_request_and_cxp_user(self):
         payment_request = self.create_request(
             PaymentRequestStatus.APPROVED,
             "Solicitud aprobada pendiente",
@@ -128,7 +128,7 @@ class PaymentExecutionTraceabilityTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No hay ejecución de pago registrada.")
-        self.assertContains(response, "Registrar pago")
+        self.assertContains(response, "Marcar emisión como pagada")
         self.assertContains(
             response,
             reverse("payment_requests:execute_payment", kwargs={"pk": payment_request.pk}),
@@ -145,7 +145,7 @@ class PaymentExecutionTraceabilityTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No hay ejecución de pago registrada.")
-        self.assertNotContains(response, "Registrar pago")
+        self.assertNotContains(response, "Marcar emisión como pagada")
 
     def test_detail_hides_register_payment_link_when_request_is_paid(self):
         payment_request = self.create_request(
@@ -166,4 +166,4 @@ class PaymentExecutionTraceabilityTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "TRACE-REF-PAID")
         self.assertNotContains(response, "No hay ejecución de pago registrada.")
-        self.assertNotContains(response, "Registrar pago")
+        self.assertNotContains(response, "Marcar emisión como pagada")

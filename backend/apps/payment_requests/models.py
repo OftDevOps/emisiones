@@ -1,8 +1,59 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
+
+
+
+MONEY_QUANTIZER = Decimal("0.01")
+
+
+def quantize_money(value: Decimal | int | str | None) -> Decimal:
+    """Normalize monetary values to two decimals using commercial rounding."""
+    if value is None:
+        value = Decimal("0.00")
+    if not isinstance(value, Decimal):
+        value = Decimal(str(value))
+    return value.quantize(MONEY_QUANTIZER, rounding=ROUND_HALF_UP)
+
+
+class TaxRate(models.Model):
+    """Configurable tax/VAT rate used by emission items."""
+
+    name = models.CharField("nombre", max_length=80)
+    percentage = models.DecimalField("porcentaje", max_digits=5, decimal_places=2)
+    is_active = models.BooleanField("activo", default=True)
+    valid_from = models.DateField("vigente desde", default=timezone.localdate)
+    valid_to = models.DateField("vigente hasta", null=True, blank=True)
+    created_at = models.DateTimeField("creado", auto_now_add=True)
+    updated_at = models.DateTimeField("actualizado", auto_now=True)
+
+    class Meta:
+        ordering = ["-is_active", "-valid_from", "name"]
+        verbose_name = "tasa de impuesto"
+        verbose_name_plural = "tasas de impuesto"
+
+    def clean(self):
+        super().clean()
+        if self.percentage < Decimal("0.00"):
+            raise ValidationError("El porcentaje de impuesto no puede ser negativo.")
+        if self.percentage > Decimal("100.00"):
+            raise ValidationError("El porcentaje de impuesto no puede ser mayor a 100%.")
+        if self.valid_to and self.valid_to < self.valid_from:
+            raise ValidationError("La fecha final de vigencia no puede ser anterior a la inicial.")
+
+    def is_valid_for(self, target_date=None) -> bool:
+        target_date = target_date or timezone.localdate()
+        if self.valid_from and target_date < self.valid_from:
+            return False
+        if self.valid_to and target_date > self.valid_to:
+            return False
+        return self.is_active
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.percentage}%)"
 
 
 class PaymentRequestStatus(models.TextChoices):
@@ -43,6 +94,18 @@ class PaymentRequest(models.Model):
         verbose_name="solicitado por",
     )
     amount = models.DecimalField(max_digits=18, decimal_places=2, verbose_name="monto")
+    subtotal_amount = models.DecimalField(
+        "subtotal",
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+    )
+    tax_amount = models.DecimalField(
+        "monto de impuesto",
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+    )
     currency = models.CharField(
         max_length=3,
         choices=Currency.choices,
@@ -138,5 +201,110 @@ class PaymentRequest(models.Model):
                 self.status = PaymentRequestStatus.UNIT_REVIEW
         self.save(update_fields=["status", "updated_at"])
 
+
+    def recalculate_totals_from_items(self, save: bool = True):
+        if not self.pk:
+            return
+
+        items = PaymentRequestItem.objects.filter(payment_request_id=self.pk)
+        subtotal = quantize_money(sum((item.subtotal_amount for item in items), Decimal("0.00")))
+        tax_total = quantize_money(sum((item.tax_amount for item in items), Decimal("0.00")))
+        total = quantize_money(subtotal + tax_total)
+
+        self.subtotal_amount = subtotal
+        self.tax_amount = tax_total
+        self.amount = total
+
+        if save:
+            PaymentRequest.objects.filter(pk=self.pk).update(
+                subtotal_amount=subtotal,
+                tax_amount=tax_total,
+                amount=total,
+                updated_at=timezone.now(),
+            )
+
     def __str__(self) -> str:
         return f"{self.company} - {self.beneficiary} - {self.amount} {self.currency}"
+
+class PaymentRequestItem(models.Model):
+    """Invoice/emission line used to calculate subtotal, VAT and final total."""
+
+    payment_request = models.ForeignKey(
+        PaymentRequest,
+        on_delete=models.CASCADE,
+        related_name="items",
+        verbose_name="emisión",
+    )
+    description = models.CharField("descripción", max_length=255)
+    quantity = models.DecimalField("cantidad", max_digits=12, decimal_places=3)
+    unit_price = models.DecimalField("precio unitario", max_digits=14, decimal_places=2)
+    tax_rate = models.ForeignKey(
+        TaxRate,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="payment_request_items",
+        verbose_name="tasa de impuesto",
+    )
+    tax_percentage_snapshot = models.DecimalField(
+        "porcentaje de impuesto aplicado",
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+    subtotal_amount = models.DecimalField("subtotal", max_digits=14, decimal_places=2, default=Decimal("0.00"))
+    tax_amount = models.DecimalField("monto de impuesto", max_digits=14, decimal_places=2, default=Decimal("0.00"))
+    total_amount = models.DecimalField("total", max_digits=14, decimal_places=2, default=Decimal("0.00"))
+    created_at = models.DateTimeField("creado", auto_now_add=True)
+    updated_at = models.DateTimeField("actualizado", auto_now=True)
+
+    class Meta:
+        ordering = ["id"]
+        verbose_name = "ítem de emisión"
+        verbose_name_plural = "ítems de emisión"
+
+    def clean(self):
+        super().clean()
+        if self.quantity <= Decimal("0.000"):
+            raise ValidationError("La cantidad del ítem debe ser mayor que cero.")
+        if self.unit_price < Decimal("0.00"):
+            raise ValidationError("El precio unitario no puede ser negativo.")
+        if self.tax_percentage_snapshot is not None:
+            if self.tax_percentage_snapshot < Decimal("0.00"):
+                raise ValidationError("El porcentaje de impuesto no puede ser negativo.")
+            if self.tax_percentage_snapshot > Decimal("100.00"):
+                raise ValidationError("El porcentaje de impuesto no puede ser mayor a 100%.")
+
+    def recalculate_amounts(self):
+        if self.tax_percentage_snapshot is None:
+            self.tax_percentage_snapshot = (
+                self.tax_rate.percentage if self.tax_rate_id and self.tax_rate else Decimal("0.00")
+            )
+
+        subtotal = quantize_money(self.quantity * self.unit_price)
+        tax = quantize_money(subtotal * self.tax_percentage_snapshot / Decimal("100.00"))
+        total = quantize_money(subtotal + tax)
+
+        self.subtotal_amount = subtotal
+        self.tax_amount = tax
+        self.total_amount = total
+        return self
+
+    def save(self, *args, **kwargs):
+        self.recalculate_amounts()
+        self.full_clean()
+        super().save(*args, **kwargs)
+        self.payment_request.recalculate_totals_from_items(save=True)
+
+    def delete(self, *args, **kwargs):
+        payment_request_id = self.payment_request_id
+        result = super().delete(*args, **kwargs)
+        if payment_request_id:
+            payment_request = PaymentRequest.objects.filter(pk=payment_request_id).first()
+            if payment_request is not None:
+                payment_request.recalculate_totals_from_items(save=True)
+        return result
+
+    def __str__(self) -> str:
+        return f"{self.description} - {self.total_amount}"
