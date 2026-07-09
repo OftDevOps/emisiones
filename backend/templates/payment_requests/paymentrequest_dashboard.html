@@ -8,7 +8,10 @@
     <p class="eyebrow">Operación controlada</p>
     <h1>Dashboard operativo de emisiones</h1>
     <p>Indicadores, pendientes y accesos rápidos según rol y alcance operativo.</p>
-  </div>
+    {% if role_nav.can_view_accounts_payable %}
+    <a class="quick-action" href="{% url 'payment_requests:accounts_payable' %}">Compras</a>
+  {% endif %}
+</div>
   <div class="dashboard-profile">
     <span>Rol</span>
     <strong>{{ dashboard_role_label }}</strong>
@@ -20,9 +23,6 @@
   <h2 class="visually-hidden">Accesos operativos</h2>
   {% if role_nav.can_view_pending_approvals %}
     <a class="quick-action" href="{% url 'payment_approvals:pending' %}">Pendientes por aprobar</a>
-  {% endif %}
-  {% if role_nav.can_view_accounts_payable %}
-    <a class="quick-action" href="{% url 'payment_requests:accounts_payable' %}">Cuentas por Pagar</a>
   {% endif %}
   {% if role_nav.can_view_payment_request_report %}
     <a class="quick-action" href="{% url 'payment_requests:report' %}">Reporte operativo</a>
@@ -52,8 +52,8 @@
 <section class="card section-card">
   <div class="section-card-header">
     <div>
-      <h2>Emisiones aprobadas pendientes de ejecución</h2>
-      <p>Total pendiente de ejecución: <strong>{{ pending_payment_count }}</strong></p>
+      <h2>Emisiones aprobadas pendientes de confirmación de pago</h2>
+      <p>Total pendiente por confirmar: <strong>{{ pending_payment_count }}</strong></p>
     </div>
   </div>
 
@@ -85,7 +85,7 @@
       </table>
     </div>
   {% else %}
-    <p class="empty-state">No hay emisiones aprobadas pendientes de ejecución.</p>
+    <p class="empty-state">No hay emisiones aprobadas pendientes de confirmación de pago.</p>
   {% endif %}
 </section>
 {% endif %}

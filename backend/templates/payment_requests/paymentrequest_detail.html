@@ -1,6 +1,36 @@
 {% extends "base.html" %}
 
-{% block title %}Emisión #{{ payment_request.id }}
+{% block title %}Emisión #{{ payment_request.id }}{% endblock %}
+
+{% block content %}
+<h1>Emisión #{{ payment_request.id }}</h1>
+
+<dl>
+    <dt>Empresa</dt>
+    <dd>{{ payment_request.company }}</dd>
+
+    <dt>Beneficiario</dt>
+    <dd>{{ payment_request.beneficiary }}</dd>
+
+    <dt>Solicitante</dt>
+    <dd>{{ payment_request.requested_by }}</dd>
+
+    <dt>Monto</dt>
+    <dd>{{ payment_request.amount }} {{ payment_request.currency }}</dd>
+
+    <dt>Concepto</dt>
+    <dd>{{ payment_request.concept }}</dd>
+
+    <dt>Descripción</dt>
+    <dd>{{ payment_request.description|default:"-" }}</dd>
+
+    <dt>Fecha de vencimiento</dt>
+    <dd>{{ payment_request.due_date|default:"-" }}</dd>
+
+    <dt>Estado</dt>
+    <dd>{{ payment_request.get_status_display }}</dd>
+</dl>
+
 <section>
   <h2>Ejecución de pago</h2>
 
@@ -39,43 +69,13 @@
     {% if can_execute_payment %}
       <p>
         <a href="{% url 'payment_requests:execute_payment' payment_request.pk %}">
-          Registrar pago en ERP
+          Marcar emisión como pagada
         </a>
       </p>
     {% endif %}
   {% endif %}
 </section>
 
-{% endblock %}
-
-{% block content %}
-<h1>Emisión #{{ payment_request.id }}</h1>
-
-<dl>
-    <dt>Empresa</dt>
-    <dd>{{ payment_request.company }}</dd>
-
-    <dt>Beneficiario</dt>
-    <dd>{{ payment_request.beneficiary }}</dd>
-
-    <dt>Solicitante</dt>
-    <dd>{{ payment_request.requested_by }}</dd>
-
-    <dt>Monto</dt>
-    <dd>{{ payment_request.amount }} {{ payment_request.currency }}</dd>
-
-    <dt>Concepto</dt>
-    <dd>{{ payment_request.concept }}</dd>
-
-    <dt>Descripción</dt>
-    <dd>{{ payment_request.description|default:"-" }}</dd>
-
-    <dt>Fecha de vencimiento</dt>
-    <dd>{{ payment_request.due_date|default:"-" }}</dd>
-
-    <dt>Estado</dt>
-    <dd>{{ payment_request.get_status_display }}</dd>
-</dl>
 
 {% if payment_request.status == "DRAFT" %}
 <section>

@@ -238,7 +238,7 @@ class PaymentRequestDashboardViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Accesos operativos")
         self.assertContains(response, "Pendientes por aprobar")
-        self.assertContains(response, "Cuentas por Pagar")
+        self.assertContains(response, "Compras")
         self.assertContains(response, reverse("payment_approvals:pending"))
         self.assertContains(response, reverse("payment_requests:accounts_payable"))
         self.assertNotContains(response, "Auditoría de acciones críticas")
@@ -258,7 +258,7 @@ class PaymentRequestDashboardViewTests(TestCase):
         self.assertContains(response, "No tienes accesos operativos adicionales para tu rol.")
         self.assertNotContains(response, "Pendientes por aprobar")
         self.assertNotContains(response, "Auditoría de acciones críticas")
-        self.assertNotContains(response, "Cuentas por Pagar")
+        self.assertNotContains(response, "Compras")
 
     def test_dashboard_shows_audit_panel_only_for_auditor(self):
         auditor = self.create_user(
@@ -275,7 +275,7 @@ class PaymentRequestDashboardViewTests(TestCase):
         self.assertContains(response, "Ir a auditoría de acciones críticas")
         self.assertContains(response, reverse("payment_approvals:audit"))
         self.assertNotContains(response, "Pendientes por aprobar")
-        self.assertNotContains(response, "Cuentas por Pagar")
+        self.assertNotContains(response, "Compras")
 
     def test_dashboard_shows_pending_payment_panel_for_accounts_payable_roles(self):
         self.client.force_login(self.user)
@@ -290,7 +290,7 @@ class PaymentRequestDashboardViewTests(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Emisiones aprobadas pendientes de ejecución")
-        self.assertContains(response, "Total pendiente de ejecución:")
+        self.assertContains(response, "Emisiones aprobadas pendientes de confirmación de pago")
+        self.assertContains(response, "Total pendiente por confirmar:")
         self.assertContains(response, "Pago aprobado pendiente")
 

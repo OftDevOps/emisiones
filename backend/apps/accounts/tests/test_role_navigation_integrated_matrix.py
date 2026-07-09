@@ -7,7 +7,6 @@ from django.urls import reverse
 from apps.accounts.models import UserRole
 from apps.accounts.role_permissions import (
     PERM_CREATE_PAYMENT_REQUEST,
-    PERM_VIEW_ACCOUNTS_PAYABLE,
     PERM_VIEW_AUDIT_WORKBENCH,
     PERM_VIEW_PAYMENT_REQUEST_DASHBOARD,
     PERM_VIEW_PAYMENT_REQUESTS,
@@ -21,7 +20,6 @@ NAVIGATION_CASES = (
     ("Listado", "payment_requests:list", PERM_VIEW_PAYMENT_REQUESTS),
     ("Nueva emisión", "payment_requests:create", PERM_CREATE_PAYMENT_REQUEST),
     ("Aprobaciones", "payment_approvals:pending", PERM_VIEW_PENDING_APPROVALS),
-    ("Cuentas por pagar", "payment_requests:accounts_payable", PERM_VIEW_ACCOUNTS_PAYABLE),
     ("Auditoria", "payment_approvals:audit", PERM_VIEW_AUDIT_WORKBENCH),
 )
 

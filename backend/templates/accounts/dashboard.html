@@ -26,7 +26,13 @@
     </article>
     <article class="card identity-card">
         <span class="identity-label">Rol</span>
-        <strong>{{ request.user.get_role_display|default:request.user.role }}</strong>
+        <strong>
+            {% if request.user.role == "CUENTAS_POR_PAGAR" %}
+                Compras
+            {% else %}
+                {{ request.user.get_role_display|default:request.user.role }}
+            {% endif %}
+        </strong>
     </article>
     <article class="card identity-card">
         <span class="identity-label">Empresa principal</span>

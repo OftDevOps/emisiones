@@ -53,11 +53,11 @@
     {% if role_nav.can_view_pending_approvals %}
         <a class="nav-link" href="{% url 'payment_approvals:pending' %}">Aprobaciones</a>
     {% endif %}
-    {% if role_nav.can_view_accounts_payable %}
-        <a class="nav-link" href="{% url 'payment_requests:accounts_payable' %}">Cuentas por pagar</a>
-    {% endif %}
     {% if role_nav.can_view_payment_request_report %}
         <a class="nav-link" href="{% url 'payment_requests:report' %}">Reporte</a>
+    {% if role_nav.can_view_accounts_payable %}
+        <a class="nav-link" href="{% url 'payment_requests:accounts_payable' %}">Compras</a>
+    {% endif %}
     {% endif %}
     {% if role_nav.can_view_audit_workbench %}
         <a class="nav-link" href="{% url 'payment_approvals:audit' %}">Auditoria</a>

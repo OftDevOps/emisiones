@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Cuentas por Pagar</h1>
-<h2>Emisiones aprobadas pendientes por ejecutar</h2>
+<h1>Confirmación de pago de emisiones</h1>
+<h2>Emisiones aprobadas pendientes de confirmación de pago</h2>
 
 <p><strong>Total pendiente:</strong> {{ pending_payment_count }}</p>
 
@@ -32,13 +32,13 @@
       <td>{{ payment_request.amount }} {{ payment_request.currency }}</td>
       <td>{{ payment_request.due_date|default:"Sin fecha" }}</td>
       <td>{{ payment_request.get_status_display }}</td>
-      <td><a href="{% url 'payment_requests:detail' payment_request.pk %}">Ver emisión</a> | <a href="{% url 'payment_requests:execute_payment' payment_request.pk %}">Registrar pago en ERP</a></td>
+      <td><a href="{% url 'payment_requests:detail' payment_request.pk %}">Ver emisión</a> | <a href="{% url 'payment_requests:execute_payment' payment_request.pk %}">Marcar emisión como pagada</a></td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 {% else %}
-<p>No hay emisiones aprobadas pendientes por ejecutar.</p>
+<p>No hay emisiones aprobadas pendientes de confirmación de pago.</p>
 {% endif %}
 
 <p><a href="{% url 'payment_requests:dashboard' %}">Volver al dashboard</a></p>

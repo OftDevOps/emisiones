@@ -25,10 +25,10 @@ class RoleBasedNavigationTemplateTests(TestCase):
         self.assertEqual(response.status_code, 200)
         content = response.content.decode("utf-8")
         self.assertIn("Emisiones", content)
-        self.assertNotIn("Cuentas por pagar", content)
+        self.assertNotIn("Compras", content)
         self.assertNotIn("Auditoria", content)
 
-    def test_cuentas_por_pagar_sees_accounts_payable_link(self):
+    def test_cuentas_por_pagar_sees_compras_link(self):
         user = self.create_user("cxp.nav@oftalmi.com", UserRole.CUENTAS_POR_PAGAR)
         self.client.force_login(user)
 
@@ -36,7 +36,7 @@ class RoleBasedNavigationTemplateTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         content = response.content.decode("utf-8")
-        self.assertIn("Cuentas por pagar", content)
+        self.assertIn("Compras", content)
 
     def test_auditor_sees_audit_link(self):
         user = self.create_user("auditor.nav@oftalmi.com", UserRole.AUDITOR)
