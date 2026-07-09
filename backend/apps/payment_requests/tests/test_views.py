@@ -104,6 +104,15 @@ class PaymentRequestViewsTests(TestCase):
                 "concept": "Nueva solicitud desde formulario",
                 "description": "Soporte pendiente",
                 "due_date": "2026-12-31",
+            "items-TOTAL_FORMS": "1",
+            "items-INITIAL_FORMS": "0",
+            "items-MIN_NUM_FORMS": "1",
+            "items-MAX_NUM_FORMS": "1000",
+            "items-0-description": "Item de prueba",
+            "items-0-quantity": "1",
+            "items-0-unit_price": "100.00",
+            "items-0-tax_rate": "",
+            "items-0-tax_percentage_snapshot": "0.00",
             },
         )
 

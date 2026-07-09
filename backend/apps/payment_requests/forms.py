@@ -1,6 +1,7 @@
+from .models import PaymentRequest, PaymentRequestItem, TaxRate
 from django import forms
+from django.forms import inlineformset_factory
 
-from .models import PaymentRequest
 from apps.beneficiaries.models import Beneficiary
 
 
@@ -49,3 +50,63 @@ class PaymentRequestCreateForm(forms.ModelForm):
             )
 
         return cleaned_data
+
+class PaymentRequestItemForm(forms.ModelForm):
+    """Form for one invoice/emission item in the payment request creation flow."""
+
+    tax_rate = forms.ModelChoiceField(
+        queryset=TaxRate.objects.filter(is_active=True),
+        required=False,
+        label="IVA",
+        empty_label="Sin IVA",
+    )
+
+    class Meta:
+        model = PaymentRequestItem
+        fields = ("description", "quantity", "unit_price", "tax_rate")
+        labels = {
+            "description": "Descripción",
+            "quantity": "Cantidad",
+            "unit_price": "Precio unitario",
+            "tax_rate": "IVA",
+        }
+        widgets = {
+            "description": forms.TextInput(attrs={"class": "form-control", "placeholder": "Descripción del ítem"}),
+            "quantity": forms.NumberInput(attrs={"class": "form-control", "min": "0.01", "step": "0.01"}),
+            "unit_price": forms.NumberInput(attrs={"class": "form-control", "min": "0.00", "step": "0.01"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["tax_rate"].widget.attrs.update({"class": "form-select"})
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("DELETE"):
+            return cleaned_data
+
+        description = cleaned_data.get("description")
+        quantity = cleaned_data.get("quantity")
+        unit_price = cleaned_data.get("unit_price")
+
+        if description or quantity or unit_price:
+            if not description:
+                self.add_error("description", "Debe indicar la descripción del ítem.")
+            if quantity is None:
+                self.add_error("quantity", "Debe indicar la cantidad del ítem.")
+            if unit_price is None:
+                self.add_error("unit_price", "Debe indicar el precio unitario del ítem.")
+
+        return cleaned_data
+
+
+PaymentRequestItemFormSet = inlineformset_factory(
+    PaymentRequest,
+    PaymentRequestItem,
+    form=PaymentRequestItemForm,
+    fields=("description", "quantity", "unit_price", "tax_rate"),
+    extra=1,
+    min_num=1,
+    validate_min=True,
+    can_delete=False,
+)

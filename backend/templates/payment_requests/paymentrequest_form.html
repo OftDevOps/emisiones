@@ -51,7 +51,57 @@
         {{ form.due_date.errors }}
     </p>
 
-    <button type="submit">Crear emisión</button>
+
+
+  <section class="card mt-4" aria-labelledby="items-title">
+    <div class="card-header">
+      <h2 id="items-title" class="h5 mb-0">Ítems de factura</h2>
+    </div>
+    <div class="card-body">
+      <p class="text-muted mb-3">Registre al menos un ítem. Los subtotales, IVA y total final se calculan en backend.</p>
+      {{ items_formset.management_form }}
+      {% if items_formset.non_form_errors %}
+        <div class="alert alert-danger">{{ items_formset.non_form_errors }}</div>
+      {% endif %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Descripción</th>
+              <th style="width: 140px;">Cantidad</th>
+              <th style="width: 160px;">Precio unitario</th>
+              <th style="width: 180px;">IVA</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item_form in items_formset.forms %}
+              <tr>
+                <td>
+                  {{ item_form.description }}
+                  {{ item_form.description.errors }}
+                </td>
+                <td>
+                  {{ item_form.quantity }}
+                  {{ item_form.quantity.errors }}
+                </td>
+                <td>
+                  {{ item_form.unit_price }}
+                  {{ item_form.unit_price.errors }}
+                </td>
+                <td>
+                  {{ item_form.tax_rate }}
+                  {{ item_form.tax_rate.errors }}
+                  {% for hidden in item_form.hidden_fields %}{{ hidden }}{% endfor %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+<button type="submit">Crear emisión</button>
 </form>
 
 <p>

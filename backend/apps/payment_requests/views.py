@@ -1,3 +1,5 @@
+from .forms import PaymentRequestItemFormSet
+from django.db import transaction
 import csv
 
 from apps.accounts.role_permissions import (
@@ -348,10 +350,39 @@ class PaymentRequestCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
-        form.instance.requested_by = self.request.user
+        context = self.get_context_data()
+        items_formset = context["items_formset"]
+        if not items_formset.is_valid():
+            return self.form_invalid(form)
+
+        with transaction.atomic():
+            self.object = form.save(commit=False)
+            if hasattr(self.object, "created_by_id") and not self.object.created_by_id:
+                self.object.created_by = self.request.user
+            if hasattr(self.object, "requested_by_id") and not self.object.requested_by_id:
+                self.object.requested_by = self.request.user
+            if hasattr(self.object, "requester_id") and not self.object.requester_id:
+                self.object.requester = self.request.user
+            self.object.save()
+            form.save_m2m()
+            items_formset.instance = self.object
+            items_formset.save()
+            self.object.recalculate_totals_from_items(save=True)
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.method == "POST":
+            context["items_formset"] = PaymentRequestItemFormSet(self.request.POST)
+        else:
+            context["items_formset"] = PaymentRequestItemFormSet()
+        return context
 
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        if "items_formset" not in self.get_context_data():
+            pass
+        return response
 class PaymentRequestSubmitView(LoginRequiredMixin, View):
     def post(self, request, pk):
         payment_request = get_object_or_404(scoped_payment_request_queryset(request.user), pk=pk)
