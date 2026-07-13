@@ -7,10 +7,18 @@ from apps.accounts.models import CustomUser, UserRole
 from apps.beneficiaries.models import Beneficiary, BeneficiaryType
 from apps.organization.models import Company
 from apps.payment_approvals.models import ApprovalActionType
-from apps.payment_requests.models import Currency, PaymentRequest, PaymentRequestStatus
+from apps.payment_requests.models import Currency, PaymentRequest, PaymentRequestStatus, PaymentRequestItem
 
 
 class PaymentRequestActionsTests(TestCase):
+
+    def _add_valid_item(self, payment_request):
+        return PaymentRequestItem.objects.create(
+            payment_request=payment_request,
+            description="Ítem válido para acción",
+            quantity=Decimal("1.000"),
+            unit_price=Decimal("100.00"),
+        )
     def setUp(self):
         self.company = Company.objects.create(name="Laboratorios Oftalmi", code="OFT")
         self.other_company = Company.objects.create(name="Otra Empresa", code="OTH")
@@ -67,6 +75,8 @@ class PaymentRequestActionsTests(TestCase):
 
     def test_authenticated_user_can_submit_draft_request(self):
         self.client.login(email="solicitante.actions@oftalmi.com", password="test-pass-123")
+        self._add_valid_item(self.payment_request)
+
         response = self.client.post(
             reverse("payment_requests:submit", args=[self.payment_request.pk])
         )
@@ -109,6 +119,8 @@ class PaymentRequestActionsTests(TestCase):
         )
 
     def test_cancel_does_not_affect_non_draft_request(self):
+        self._add_valid_item(self.payment_request)
+
         self.payment_request.submit_for_approval(self.user)
         self.client.login(email="solicitante.actions@oftalmi.com", password="test-pass-123")
         response = self.client.post(
@@ -123,6 +135,8 @@ class PaymentRequestActionsTests(TestCase):
         )
 
     def test_detail_shows_approval_route_after_submit(self):
+        self._add_valid_item(self.payment_request)
+
         self.payment_request.submit_for_approval(self.user)
         self.client.login(email="solicitante.actions@oftalmi.com", password="test-pass-123")
         response = self.client.get(

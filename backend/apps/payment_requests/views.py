@@ -103,6 +103,7 @@ class PaymentRequestDetailView(LoginRequiredMixin, DetailView):
         return scoped_payment_request_queryset(self.request.user).prefetch_related(
             "approval_steps",
             "approval_actions",
+            "items__tax_rate",
         )
 
     def get_context_data(self, **kwargs):
@@ -200,6 +201,8 @@ class PaymentRequestReportView(LoginRequiredMixin, TemplateView):
         payment_requests = self.get_filtered_queryset()
         totals = payment_requests.aggregate(
             total_requests=Count("id"),
+            total_subtotal=Sum("subtotal_amount"),
+            total_tax=Sum("tax_amount"),
             total_amount=Sum("amount"),
         )
         summary_rows = payment_requests.values(
@@ -207,6 +210,8 @@ class PaymentRequestReportView(LoginRequiredMixin, TemplateView):
             "status",
         ).annotate(
             total=Count("id"),
+            subtotal=Sum("subtotal_amount"),
+            tax=Sum("tax_amount"),
             amount=Sum("amount"),
         ).order_by("company__name", "status")
 
@@ -215,6 +220,8 @@ class PaymentRequestReportView(LoginRequiredMixin, TemplateView):
                 "payment_requests": payment_requests[:100],
                 "summary_rows": summary_rows,
                 "total_requests": totals["total_requests"] or 0,
+                "total_subtotal": totals["total_subtotal"] or 0,
+                "total_tax": totals["total_tax"] or 0,
                 "total_amount": totals["total_amount"] or 0,
                 "status_choices": PaymentRequestStatus.choices,
                 "available_companies": self.get_available_companies(),
@@ -251,7 +258,9 @@ class PaymentRequestReportExportView(LoginRequiredMixin, View):
             "Concepto",
             "Estado",
             "Fecha vencimiento",
-            "Monto",
+            "Subtotal",
+            "IVA",
+            "Total",
             "Moneda",
             "Solicitado por",
         ])
@@ -263,6 +272,8 @@ class PaymentRequestReportExportView(LoginRequiredMixin, View):
                 payment_request.concept,
                 payment_request.get_status_display(),
                 payment_request.due_date.isoformat() if payment_request.due_date else "",
+                payment_request.subtotal_amount,
+                payment_request.tax_amount,
                 payment_request.amount,
                 payment_request.currency,
                 payment_request.requested_by.email if payment_request.requested_by else "",

@@ -6,7 +6,13 @@ from django.urls import reverse
 from apps.accounts.models import CustomUser, UserRole
 from apps.beneficiaries.models import Beneficiary, BeneficiaryType
 from apps.organization.models import Company
-from apps.payment_requests.models import Currency, PaymentRequest, PaymentRequestStatus
+from apps.payment_requests.models import (
+    Currency,
+    PaymentRequest,
+    PaymentRequestItem,
+    PaymentRequestStatus,
+    TaxRate,
+)
 
 
 class PaymentRequestViewsTests(TestCase):
@@ -85,6 +91,32 @@ class PaymentRequestViewsTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Pago desde vistas")
+
+    def test_detail_displays_invoice_items_and_totals(self):
+        tax_rate = TaxRate.objects.create(
+            name="IVA detalle 16%",
+            percentage=Decimal("16.00"),
+            is_active=True,
+        )
+        PaymentRequestItem.objects.create(
+            payment_request=self.payment_request,
+            description="Servicio mostrado en detalle",
+            quantity=Decimal("2.000"),
+            unit_price=Decimal("100.00"),
+            tax_rate=tax_rate,
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse("payment_requests:detail", args=[self.payment_request.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ítems de factura")
+        self.assertContains(response, "Servicio mostrado en detalle")
+        self.assertContains(response, "200.00")
+        self.assertContains(response, "32.00")
+        self.assertContains(response, "232.00")
 
     def test_authenticated_user_cannot_view_other_company_request_detail(self):
         self.client.force_login(self.user)

@@ -48,16 +48,28 @@
       <button type="submit" class="btn btn-secondary">Exportar CSV</button>
     </form>
 
-    <div class="row mb-4">
-      <div class="col-md-6">
+    <div class="row mb-4 g-3">
+      <div class="col-md-3">
         <div class="border rounded p-3">
           <strong>Total emisiones</strong>
           <div>{{ total_requests }}</div>
         </div>
       </div>
-      <div class="col-md-6">
+      <div class="col-md-3">
         <div class="border rounded p-3">
-          <strong>Monto total</strong>
+          <strong>Subtotal</strong>
+          <div>{{ total_subtotal }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="border rounded p-3">
+          <strong>IVA</strong>
+          <div>{{ total_tax }}</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="border rounded p-3">
+          <strong>Total</strong>
           <div>{{ total_amount }}</div>
         </div>
       </div>
@@ -70,7 +82,9 @@
           <th>Empresa</th>
           <th>Estado</th>
           <th>Cantidad</th>
-          <th>Monto</th>
+          <th>Subtotal</th>
+          <th>IVA</th>
+          <th>Total</th>
         </tr>
       </thead>
       <tbody>
@@ -79,10 +93,12 @@
             <td>{{ row.company__name }}</td>
             <td>{{ row.status }}</td>
             <td>{{ row.total }}</td>
+            <td>{{ row.subtotal }}</td>
+            <td>{{ row.tax }}</td>
             <td>{{ row.amount }}</td>
           </tr>
         {% empty %}
-          <tr><td colspan="4">Sin emisiones para los filtros seleccionados.</td></tr>
+          <tr><td colspan="6">Sin emisiones para los filtros seleccionados.</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -96,7 +112,9 @@
           <th>Concepto</th>
           <th>Estado</th>
           <th>Fecha vencimiento</th>
-          <th>Monto</th>
+          <th>Subtotal</th>
+          <th>IVA</th>
+          <th>Total</th>
         </tr>
       </thead>
       <tbody>
@@ -107,10 +125,12 @@
             <td>{{ request.concept }}</td>
             <td>{{ request.get_status_display }}</td>
             <td>{{ request.due_date|default:"-" }}</td>
+            <td>{{ request.subtotal_amount }} {{ request.currency }}</td>
+            <td>{{ request.tax_amount }} {{ request.currency }}</td>
             <td>{{ request.amount }} {{ request.currency }}</td>
           </tr>
         {% empty %}
-          <tr><td colspan="6">Sin detalle disponible.</td></tr>
+          <tr><td colspan="8">Sin detalle disponible.</td></tr>
         {% endfor %}
       </tbody>
     </table>

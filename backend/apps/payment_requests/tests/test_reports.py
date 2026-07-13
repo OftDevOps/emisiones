@@ -7,7 +7,13 @@ from django.urls import reverse
 from apps.accounts.models import CustomUser, UserRole
 from apps.beneficiaries.models import Beneficiary, BeneficiaryType
 from apps.organization.models import Company
-from apps.payment_requests.models import Currency, PaymentRequest, PaymentRequestStatus
+from apps.payment_requests.models import (
+    Currency,
+    PaymentRequest,
+    PaymentRequestItem,
+    PaymentRequestStatus,
+    TaxRate,
+)
 
 
 class PaymentRequestReportViewTests(TestCase):
@@ -148,6 +154,40 @@ class PaymentRequestReportViewTests(TestCase):
         self.assertNotContains(response, "Rechazada fuera del filtro")
         self.assertNotContains(response, "Aprobada fuera de fecha")
 
+    def test_report_displays_subtotal_tax_and_total(self):
+        self.client.force_login(self.finance_user)
+        payment_request = self.create_payment_request(
+            self.company,
+            self.beneficiary,
+            self.finance_user,
+            PaymentRequestStatus.APPROVED,
+            "Emisión con desglose tributario",
+            date(2026, 7, 15),
+        )
+        tax_rate = TaxRate.objects.create(
+            name="IVA reporte 16%",
+            percentage=Decimal("16.00"),
+            is_active=True,
+        )
+        PaymentRequestItem.objects.create(
+            payment_request=payment_request,
+            description="Servicio gravado para reporte",
+            quantity=Decimal("2.000"),
+            unit_price=Decimal("100.00"),
+            tax_rate=tax_rate,
+        )
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_subtotal"], Decimal("200.00"))
+        self.assertEqual(response.context["total_tax"], Decimal("32.00"))
+        self.assertEqual(response.context["total_amount"], Decimal("232.00"))
+        self.assertContains(response, "Subtotal")
+        self.assertContains(response, "IVA")
+        self.assertContains(response, "Total")
+        self.assertContains(response, "Emisión con desglose tributario")
+
     def test_report_export_requires_login(self):
         response = self.client.get(reverse("payment_requests:report_export"))
 
@@ -200,7 +240,10 @@ class PaymentRequestReportViewTests(TestCase):
         self.assertEqual(response["Content-Type"], "text/csv; charset=utf-8")
         self.assertIn("attachment;", response["Content-Disposition"])
         content = response.content.decode("utf-8-sig")
-        self.assertIn("Empresa,Beneficiario,Concepto,Estado", content)
+        self.assertIn(
+            "Empresa,Beneficiario,Concepto,Estado,Fecha vencimiento,Subtotal,IVA,Total,Moneda,Solicitado por",
+            content,
+        )
         self.assertIn("Exportable dentro del rango", content)
         self.assertNotIn("No exportable por estado", content)
         self.assertNotIn("No exportable por empresa", content)
