@@ -7,6 +7,7 @@ from django.test import TestCase
 from apps.accounts.models import CustomUser, UserRole
 from apps.beneficiaries.models import Beneficiary, BeneficiaryType
 from apps.organization.models import Company
+from apps.payment_requests.validators import assert_payment_request_ready_for_approval
 from apps.payment_requests.models import Currency, PaymentRequest, PaymentRequestItem, TaxRate
 
 
@@ -114,3 +115,37 @@ class PaymentRequestItemTaxModelTests(TestCase):
         self.assertEqual(persisted.subtotal_amount, Decimal("0.00"))
         self.assertEqual(persisted.tax_amount, Decimal("0.00"))
         self.assertEqual(persisted.amount, Decimal("0.00"))
+
+    def test_approval_validation_rejects_request_without_items(self):
+        with self.assertRaises(ValidationError):
+            assert_payment_request_ready_for_approval(self.payment_request)
+
+    def test_approval_validation_rejects_inconsistent_totals(self):
+        PaymentRequestItem.objects.create(
+            payment_request=self.payment_request,
+            description="Servicio con total inconsistente",
+            quantity=Decimal("1"),
+            unit_price=Decimal("100.00"),
+            tax_rate=self.tax_rate,
+        )
+        type(self.payment_request).objects.filter(pk=self.payment_request.pk).update(amount=Decimal("999.99"))
+        self.payment_request.refresh_from_db()
+
+        with self.assertRaises(ValidationError):
+            assert_payment_request_ready_for_approval(self.payment_request)
+
+    def test_approval_validation_accepts_valid_items_and_totals(self):
+        PaymentRequestItem.objects.create(
+            payment_request=self.payment_request,
+            description="Servicio listo para aprobacion",
+            quantity=Decimal("1"),
+            unit_price=Decimal("100.00"),
+            tax_rate=self.tax_rate,
+        )
+        self.payment_request.refresh_from_db()
+
+        assert_payment_request_ready_for_approval(self.payment_request)
+
+    def test_send_to_approval_rejects_request_without_items(self):
+        with self.assertRaises(ValidationError):
+            self.payment_request.submit_for_approval(self.user)

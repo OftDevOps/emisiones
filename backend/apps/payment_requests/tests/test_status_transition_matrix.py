@@ -9,10 +9,21 @@ from apps.beneficiaries.models import Beneficiary, BeneficiaryType
 from apps.organization.models import Company
 from apps.payment_approvals.models import ApprovalActionType, ApprovalStepStatus, PaymentApprovalAction
 from apps.payment_execution.models import PaymentExecution
-from apps.payment_requests.models import Currency, PaymentRequest, PaymentRequestStatus
+from apps.payment_requests.models import Currency, PaymentRequest, PaymentRequestStatus, PaymentRequestItem
 
 
 class PaymentRequestStatusTransitionMatrixTests(TestCase):
+
+    def _add_valid_item(self, payment_request):
+        item = PaymentRequestItem.objects.create(
+            payment_request=payment_request,
+            description="Item válido para transición",
+            quantity=Decimal("1.00"),
+            unit_price=Decimal("100.00"),
+        )
+        payment_request.recalculate_totals_from_items()
+        payment_request.refresh_from_db()
+        return item
     def setUp(self):
         self.company = Company.objects.create(name="Laboratorios Oftalmi", code="OFT")
         self.requester = self.create_user("solicitante.transition@oftalmi.com", UserRole.SOLICITANTE)
@@ -51,6 +62,8 @@ class PaymentRequestStatusTransitionMatrixTests(TestCase):
         payment_request = self.create_payment_request()
 
         self.assertEqual(payment_request.status, PaymentRequestStatus.DRAFT)
+
+        self._add_valid_item(payment_request)
 
         payment_request.submit_for_approval(self.requester)
         payment_request.refresh_from_db()
@@ -100,6 +113,7 @@ class PaymentRequestStatusTransitionMatrixTests(TestCase):
 
     def test_review_step_rejection_transitions_request_to_rejected(self):
         payment_request = self.create_payment_request("Pago rechazable")
+        self._add_valid_item(payment_request)
         payment_request.submit_for_approval(self.requester)
 
         step1 = payment_request.approval_steps.get(sequence=1)
@@ -120,6 +134,8 @@ class PaymentRequestStatusTransitionMatrixTests(TestCase):
 
     def test_request_cannot_be_submitted_outside_draft(self):
         payment_request = self.create_payment_request("Pago no reenviable")
+        self._add_valid_item(payment_request)
+
         payment_request.submit_for_approval(self.requester)
         payment_request.refresh_from_db()
 
@@ -143,6 +159,7 @@ class PaymentRequestStatusTransitionMatrixTests(TestCase):
 
     def test_submitted_state_is_not_used_by_current_transition_flow(self):
         payment_request = self.create_payment_request("Pago sin estado submitted")
+        self._add_valid_item(payment_request)
         payment_request.submit_for_approval(self.requester)
         payment_request.refresh_from_db()
 

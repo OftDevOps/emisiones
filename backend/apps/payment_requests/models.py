@@ -156,6 +156,9 @@ class PaymentRequest(models.Model):
         if self.status != PaymentRequestStatus.DRAFT:
             from django.core.exceptions import ValidationError
             raise ValidationError("Solo solicitudes en borrador pueden enviarse a aprobación.")
+
+        from .validators import assert_payment_request_ready_for_approval
+        assert_payment_request_ready_for_approval(self)
         self.status = PaymentRequestStatus.UNIT_REVIEW
         self.save(update_fields=["status", "updated_at"])
 
