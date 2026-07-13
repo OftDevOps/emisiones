@@ -11,6 +11,7 @@ from .views import (
     PaymentRequestReportView,
     PaymentRequestReportExportView,
     PaymentRequestSubmitView,
+    PaymentRequestUpdateView,
 )
 
 app_name = "payment_requests"
@@ -23,6 +24,7 @@ urlpatterns = [
     path("reports/basic/export/", PaymentRequestReportExportView.as_view(), name="report_export"),
     path("accounts-payable/", AccountsPayablePendingView.as_view(), name="accounts_payable"),
     path("<int:pk>/execute-payment/", PaymentExecutionCreateView.as_view(), name="execute_payment"),
+    path("<int:pk>/edit/", PaymentRequestUpdateView.as_view(), name="edit"),
     path("<int:pk>/", PaymentRequestDetailView.as_view(), name="detail"),
     path("<int:pk>/submit/", PaymentRequestSubmitView.as_view(), name="submit"),
     path("<int:pk>/cancel/", PaymentRequestCancelView.as_view(), name="cancel"),

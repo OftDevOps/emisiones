@@ -1,8 +1,9 @@
-from .forms import PaymentRequestItemFormSet
+from .forms import PaymentRequestItemFormSet, PaymentRequestItemUpdateFormSet
 from django.db import transaction
 import csv
 
 from apps.accounts.role_permissions import (
+    PERM_CREATE_PAYMENT_REQUEST,
     PERM_VIEW_AUDIT_WORKBENCH,
     PERM_VIEW_ACCOUNTS_PAYABLE,
     PERM_VIEW_PAYMENT_REQUEST_DASHBOARD,
@@ -18,7 +19,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils.dateparse import parse_date
 from django.views import View
-from django.views.generic import CreateView, DetailView, ListView, TemplateView
+from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView
 from apps.accounts.models import UserRole
 from apps.organization.models import Company
 
@@ -29,7 +30,7 @@ from apps.payment_approvals.models import (
     PaymentApprovalStep,
 )
 
-from .forms import PaymentRequestCreateForm
+from .forms import PaymentRequestCreateForm, PaymentRequestUpdateForm
 from .models import PaymentRequest, PaymentRequestStatus
 
 
@@ -133,6 +134,15 @@ class PaymentRequestDetailView(LoginRequiredMixin, DetailView):
         context["approval_actions"] = payment_request.approval_actions.all().order_by("-created_at")
         context["payment_execution"] = payment_execution
         context["can_execute_payment"] = can_execute_payment
+        context["can_edit_payment_request"] = (
+            payment_request.status == PaymentRequestStatus.DRAFT
+            and user_has_permission(user, PERM_CREATE_PAYMENT_REQUEST)
+            and (
+                user.is_superuser
+                or user.role == UserRole.ADMINISTRADOR
+                or payment_request.requested_by_id == user.id
+            )
+        )
         return context
 
 
@@ -394,6 +404,57 @@ class PaymentRequestCreateView(LoginRequiredMixin, CreateView):
         if "items_formset" not in self.get_context_data():
             pass
         return response
+class PaymentRequestUpdateView(LoginRequiredMixin, UpdateView):
+    model = PaymentRequest
+    form_class = PaymentRequestUpdateForm
+    template_name = "payment_requests/paymentrequest_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        _require_operational_permission(
+            request.user,
+            PERM_CREATE_PAYMENT_REQUEST,
+            "Su rol no permite editar emisiones.",
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        queryset = scoped_payment_request_queryset(self.request.user).filter(
+            status=PaymentRequestStatus.DRAFT
+        )
+        user = self.request.user
+        if user.is_superuser or user.role == UserRole.ADMINISTRADOR:
+            return queryset
+        return queryset.filter(requested_by=user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        formset_kwargs = {"instance": self.object}
+        if self.request.method == "POST":
+            formset_kwargs["data"] = self.request.POST
+        context["items_formset"] = PaymentRequestItemUpdateFormSet(**formset_kwargs)
+        context["form_mode"] = "edit"
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data(form=form)
+        items_formset = context["items_formset"]
+        if not items_formset.is_valid():
+            return self.form_invalid(form)
+
+        with transaction.atomic():
+            self.object = form.save()
+            items_formset.instance = self.object
+            items_formset.save()
+            self.object.recalculate_totals_from_items(save=True)
+
+        return redirect("payment_requests:detail", pk=self.object.pk)
+
+
 class PaymentRequestSubmitView(LoginRequiredMixin, View):
     def post(self, request, pk):
         payment_request = get_object_or_404(scoped_payment_request_queryset(request.user), pk=pk)

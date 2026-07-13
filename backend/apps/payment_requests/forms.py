@@ -51,6 +51,20 @@ class PaymentRequestCreateForm(forms.ModelForm):
 
         return cleaned_data
 
+class PaymentRequestUpdateForm(PaymentRequestCreateForm):
+    """Editable fields for a payment request while it remains in draft."""
+
+    class Meta(PaymentRequestCreateForm.Meta):
+        fields = [
+            "company",
+            "beneficiary",
+            "currency",
+            "concept",
+            "description",
+            "due_date",
+        ]
+
+
 class PaymentRequestItemForm(forms.ModelForm):
     """Form for one invoice/emission item in the payment request creation flow."""
 
@@ -109,4 +123,16 @@ PaymentRequestItemFormSet = inlineformset_factory(
     min_num=1,
     validate_min=True,
     can_delete=False,
+)
+
+
+PaymentRequestItemUpdateFormSet = inlineformset_factory(
+    PaymentRequest,
+    PaymentRequestItem,
+    form=PaymentRequestItemForm,
+    fields=("description", "quantity", "unit_price", "tax_rate"),
+    extra=1,
+    min_num=1,
+    validate_min=True,
+    can_delete=True,
 )

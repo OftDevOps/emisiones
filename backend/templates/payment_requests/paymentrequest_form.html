@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Nueva emisión{% endblock %}
+{% block title %}{% if form_mode == "edit" %}Editar emisión{% else %}Nueva emisión{% endif %}{% endblock %}
 
 {% block content %}
-<h1>Nueva emisión</h1>
+<h1>{% if form_mode == "edit" %}Editar emisión #{{ object.pk }}{% else %}Nueva emisión{% endif %}</h1>
 
 <form method="post">
     {% csrf_token %}
@@ -21,11 +21,13 @@
         {{ form.beneficiary.errors }}
     </p>
 
+    {% if form.amount %}
     <p>
         {{ form.amount.label_tag }}<br>
         {{ form.amount }}
         {{ form.amount.errors }}
     </p>
+    {% endif %}
 
     <p>
         {{ form.currency.label_tag }}<br>
@@ -71,6 +73,7 @@
               <th style="width: 140px;">Cantidad</th>
               <th style="width: 160px;">Precio unitario</th>
               <th style="width: 180px;">IVA</th>
+              {% if form_mode == "edit" %}<th style="width: 100px;">Eliminar</th>{% endif %}
             </tr>
           </thead>
           <tbody>
@@ -93,6 +96,9 @@
                   {{ item_form.tax_rate.errors }}
                   {% for hidden in item_form.hidden_fields %}{{ hidden }}{% endfor %}
                 </td>
+                {% if form_mode == "edit" %}
+                <td>{{ item_form.DELETE }} {{ item_form.DELETE.errors }}</td>
+                {% endif %}
               </tr>
             {% endfor %}
           </tbody>
@@ -101,10 +107,14 @@
     </div>
   </section>
 
-<button type="submit">Crear emisión</button>
+<button type="submit">{% if form_mode == "edit" %}Guardar cambios{% else %}Crear emisión{% endif %}</button>
 </form>
 
 <p>
-    <a href="{% url 'payment_requests:list' %}">Cancelar</a>
+    {% if form_mode == "edit" %}
+      <a href="{% url 'payment_requests:detail' object.pk %}">Cancelar</a>
+    {% else %}
+      <a href="{% url 'payment_requests:list' %}">Cancelar</a>
+    {% endif %}
 </p>
 {% endblock %}

@@ -136,6 +136,10 @@
 <section>
     <h2>Acciones</h2>
 
+    {% if can_edit_payment_request %}
+    <p><a href="{% url 'payment_requests:edit' payment_request.pk %}">Editar emisión e ítems</a></p>
+    {% endif %}
+
     <form method="post" action="{% url 'payment_requests:submit' payment_request.pk %}">
         {% csrf_token %}
         <button type="submit">Enviar a aprobación</button>
